@@ -1,0 +1,34 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# Node / Frontend
+node_modules/
+ui/node_modules/
+ui/dist/
+dist/
+
+# Local configuration and credentials
+.env
+.env.local
+
+# Runtime data and scratch
+data/
+runs/
+logs/
+*.log
+
+# OS artifacts
+.DS_Store
+Thumbs.db

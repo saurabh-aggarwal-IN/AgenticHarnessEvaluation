@@ -1,0 +1,611 @@
+{
+  "comparison_id": "cmp-20261023223448-ec980a",
+  "status": "COMPLETED",
+  "generated_at": "2026-10-23T22:36:59.377549+00:00",
+  "axes": [
+    {
+      "key": "accuracy",
+      "label": "Accuracy",
+      "description": "Micro F1 over all expected and returned graded codes. A failed job counts as missed expected codes."
+    },
+    {
+      "key": "recall",
+      "label": "Recall",
+      "description": "Share of gold codes that were returned, pooled across jobs."
+    },
+    {
+      "key": "precision",
+      "label": "Precision",
+      "description": "Share of returned graded codes that are in the gold set."
+    },
+    {
+      "key": "provenance",
+      "label": "Provenance",
+      "description": "Share of returned codes whose snippet is verbatim in the encounter note after whitespace normalization."
+    },
+    {
+      "key": "safety",
+      "label": "Safety",
+      "description": "Share of jobs with no forbidden code and no scope violation."
+    },
+    {
+      "key": "exact_match",
+      "label": "Exact set",
+      "description": "Share of jobs whose graded code set exactly equals the gold set."
+    },
+    {
+      "key": "history_specificity",
+      "label": "History specificity",
+      "description": "Share of applicable jobs where every gold code annotated with historySnippet was returned. Applicability comes from that annotation, not requiredHistory.mustRead; retrieval-only cases do not contribute. Null when no case has a history-specific gold code."
+    },
+    {
+      "key": "efficiency",
+      "label": "Efficiency",
+      "description": "Bounded reference score: 0.5 x 60s/(60s+mean latency) + 0.5 x 4000/(4000+mean total tokens). Not a cost or quality measure."
+    }
+  ],
+  "series": [
+    {
+      "harness_id": "h1",
+      "harness_name": "H1 Direct Hermes CLI",
+      "model": "mock/clinical-coder",
+      "label": "H1 Direct Hermes CLI / mock/clinical-coder",
+      "n": 10,
+      "values": {
+        "accuracy": 0.954545,
+        "recall": 0.954545,
+        "precision": 0.954545,
+        "provenance": 1.0,
+        "safety": 0.9,
+        "exact_match": 0.9,
+        "history_specificity": 0.0,
+        "efficiency": 0.799121
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 21,
+          "returned": 22,
+          "expected": 22,
+          "false_negatives": 1,
+          "precision": 0.954545,
+          "recall": 0.954545,
+          "f1": 0.954545
+        },
+        "exact_match_rate": 0.9,
+        "forbidden_free_rate": 0.9,
+        "forbidden_hits": 1,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 0.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 0.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 10196.1,
+          "p50": 10110.5,
+          "p95": 11417.4,
+          "max": 11637.0
+        },
+        "tokens": {
+          "input": 12000,
+          "output": 1800,
+          "total": 13800,
+          "calls": 10,
+          "mean_per_job": 1380.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.799121
+      }
+    },
+    {
+      "harness_id": "h2",
+      "harness_name": "H2 Planner + Coder",
+      "model": "mock/clinical-coder",
+      "label": "H2 Planner + Coder / mock/clinical-coder",
+      "n": 10,
+      "values": {
+        "accuracy": 0.977778,
+        "recall": 1.0,
+        "precision": 0.956522,
+        "provenance": 1.0,
+        "safety": 0.9,
+        "exact_match": 0.9,
+        "history_specificity": 1.0,
+        "efficiency": 0.780608
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 22,
+          "returned": 23,
+          "expected": 22,
+          "false_negatives": 0,
+          "precision": 0.956522,
+          "recall": 1.0,
+          "f1": 0.977778
+        },
+        "exact_match_rate": 0.9,
+        "forbidden_free_rate": 0.9,
+        "forbidden_hits": 1,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 1.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 1.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 1887.6,
+          "p50": 1988.0,
+          "p95": 1992.55,
+          "max": 1993.0
+        },
+        "tokens": {
+          "input": 24000,
+          "output": 3600,
+          "total": 27600,
+          "calls": 20,
+          "mean_per_job": 2760.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.780608
+      }
+    },
+    {
+      "harness_id": "h3",
+      "harness_name": "H3 Planner + Coder + Verifier",
+      "model": "mock/clinical-coder",
+      "label": "H3 Planner + Coder + Verifier / mock/clinical-coder",
+      "n": 10,
+      "values": {
+        "accuracy": 1.0,
+        "recall": 1.0,
+        "precision": 1.0,
+        "provenance": 1.0,
+        "safety": 1.0,
+        "exact_match": 1.0,
+        "history_specificity": 1.0,
+        "efficiency": 0.71345
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 22,
+          "returned": 22,
+          "expected": 22,
+          "false_negatives": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "exact_match_rate": 1.0,
+        "forbidden_free_rate": 1.0,
+        "forbidden_hits": 0,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 1.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 1.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 3050.7,
+          "p50": 2989.0,
+          "p95": 4082.099999999998,
+          "max": 4974.0
+        },
+        "tokens": {
+          "input": 38400,
+          "output": 5760,
+          "total": 44160,
+          "calls": 32,
+          "mean_per_job": 4416.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.71345
+      }
+    }
+  ],
+  "aggregate": [
+    {
+      "harness_id": "h1",
+      "harness_name": "H1 Direct Hermes CLI",
+      "model": null,
+      "label": "H1 Direct Hermes CLI",
+      "n": 10,
+      "values": {
+        "accuracy": 0.954545,
+        "recall": 0.954545,
+        "precision": 0.954545,
+        "provenance": 1.0,
+        "safety": 0.9,
+        "exact_match": 0.9,
+        "history_specificity": 0.0,
+        "efficiency": 0.799121
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 21,
+          "returned": 22,
+          "expected": 22,
+          "false_negatives": 1,
+          "precision": 0.954545,
+          "recall": 0.954545,
+          "f1": 0.954545
+        },
+        "exact_match_rate": 0.9,
+        "forbidden_free_rate": 0.9,
+        "forbidden_hits": 1,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 0.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 0.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 10196.1,
+          "p50": 10110.5,
+          "p95": 11417.4,
+          "max": 11637.0
+        },
+        "tokens": {
+          "input": 12000,
+          "output": 1800,
+          "total": 13800,
+          "calls": 10,
+          "mean_per_job": 1380.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.799121
+      }
+    },
+    {
+      "harness_id": "h2",
+      "harness_name": "H2 Planner + Coder",
+      "model": null,
+      "label": "H2 Planner + Coder",
+      "n": 10,
+      "values": {
+        "accuracy": 0.977778,
+        "recall": 1.0,
+        "precision": 0.956522,
+        "provenance": 1.0,
+        "safety": 0.9,
+        "exact_match": 0.9,
+        "history_specificity": 1.0,
+        "efficiency": 0.780608
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 22,
+          "returned": 23,
+          "expected": 22,
+          "false_negatives": 0,
+          "precision": 0.956522,
+          "recall": 1.0,
+          "f1": 0.977778
+        },
+        "exact_match_rate": 0.9,
+        "forbidden_free_rate": 0.9,
+        "forbidden_hits": 1,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 1.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 1.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 1887.6,
+          "p50": 1988.0,
+          "p95": 1992.55,
+          "max": 1993.0
+        },
+        "tokens": {
+          "input": 24000,
+          "output": 3600,
+          "total": 27600,
+          "calls": 20,
+          "mean_per_job": 2760.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.780608
+      }
+    },
+    {
+      "harness_id": "h3",
+      "harness_name": "H3 Planner + Coder + Verifier",
+      "model": null,
+      "label": "H3 Planner + Coder + Verifier",
+      "n": 10,
+      "values": {
+        "accuracy": 1.0,
+        "recall": 1.0,
+        "precision": 1.0,
+        "provenance": 1.0,
+        "safety": 1.0,
+        "exact_match": 1.0,
+        "history_specificity": 1.0,
+        "efficiency": 0.71345
+      },
+      "metrics": {
+        "n": 10,
+        "successful_jobs": 10,
+        "success_rate": 1.0,
+        "delivery_rate": 1.0,
+        "micro": {
+          "true_positives": 22,
+          "returned": 22,
+          "expected": 22,
+          "false_negatives": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "exact_match_rate": 1.0,
+        "forbidden_free_rate": 1.0,
+        "forbidden_hits": 0,
+        "provenance_rate": 1.0,
+        "grounded_code_rate": 1.0,
+        "schema_valid_rate": 1.0,
+        "history_specificity_rate": 1.0,
+        "history_applicable_jobs": 1,
+        "history_read_rate": 1.0,
+        "history_present_jobs": 10,
+        "em_ignored": 0,
+        "invalid_entries": 0,
+        "error_codes": {},
+        "guardrail_flags": {
+          "input": {},
+          "output": {}
+        },
+        "latency_ms": {
+          "mean": 3050.7,
+          "p50": 2989.0,
+          "p95": 4082.099999999998,
+          "max": 4974.0
+        },
+        "tokens": {
+          "input": 38400,
+          "output": 5760,
+          "total": 44160,
+          "calls": 32,
+          "mean_per_job": 4416.0
+        },
+        "cost": {
+          "known_jobs": 0,
+          "total_usd": null,
+          "mean_usd": null
+        },
+        "efficiency": 0.71345
+      }
+    }
+  ],
+  "paired": [
+    {
+      "model": "mock/clinical-coder",
+      "a": "h1",
+      "b": "h2",
+      "n": 10,
+      "mean_delta_f1": 0.066667,
+      "wins_b": 1,
+      "ties": 8,
+      "losses_b": 1,
+      "mean_delta_exact_match": 0.0,
+      "note": "Descriptive paired delta (b minus a) on identical case/trial pairs; no significance claim."
+    },
+    {
+      "model": "mock/clinical-coder",
+      "a": "h1",
+      "b": "h3",
+      "n": 10,
+      "mean_delta_f1": 0.1,
+      "wins_b": 1,
+      "ties": 9,
+      "losses_b": 0,
+      "mean_delta_exact_match": 0.1,
+      "note": "Descriptive paired delta (b minus a) on identical case/trial pairs; no significance claim."
+    },
+    {
+      "model": "mock/clinical-coder",
+      "a": "h2",
+      "b": "h3",
+      "n": 10,
+      "mean_delta_f1": 0.033333,
+      "wins_b": 1,
+      "ties": 9,
+      "losses_b": 0,
+      "mean_delta_exact_match": 0.1,
+      "note": "Descriptive paired delta (b minus a) on identical case/trial pairs; no significance claim."
+    }
+  ],
+  "overall": {
+    "n": 30,
+    "successful_jobs": 30,
+    "success_rate": 1.0,
+    "delivery_rate": 1.0,
+    "micro": {
+      "true_positives": 65,
+      "returned": 67,
+      "expected": 66,
+      "false_negatives": 1,
+      "precision": 0.970149,
+      "recall": 0.984848,
+      "f1": 0.977444
+    },
+    "exact_match_rate": 0.933333,
+    "forbidden_free_rate": 0.933333,
+    "forbidden_hits": 2,
+    "provenance_rate": 1.0,
+    "grounded_code_rate": 1.0,
+    "schema_valid_rate": 1.0,
+    "history_specificity_rate": 0.666667,
+    "history_applicable_jobs": 3,
+    "history_read_rate": 0.666667,
+    "history_present_jobs": 30,
+    "em_ignored": 0,
+    "invalid_entries": 0,
+    "error_codes": {},
+    "guardrail_flags": {
+      "input": {},
+      "output": {}
+    },
+    "latency_ms": {
+      "mean": 5044.8,
+      "p50": 2989.0,
+      "p95": 10954.599999999999,
+      "max": 11637.0
+    },
+    "tokens": {
+      "input": 74400,
+      "output": 11160,
+      "total": 85560,
+      "calls": 62,
+      "mean_per_job": 2852.0
+    },
+    "cost": {
+      "known_jobs": 0,
+      "total_usd": null,
+      "mean_usd": null
+    },
+    "efficiency": 0.753106
+  },
+  "models": [
+    "mock/clinical-coder"
+  ],
+  "harnesses": [
+    {
+      "id": "h1",
+      "name": "H1 Direct Hermes CLI"
+    },
+    {
+      "id": "h2",
+      "name": "H2 Planner + Coder"
+    },
+    {
+      "id": "h3",
+      "name": "H3 Planner + Coder + Verifier"
+    }
+  ],
+  "warnings": [
+    "Screening and descriptive comparison only. H1 differs from H2/H3 by orchestration, history access, and execution path, so harness contrasts are not causal.",
+    "The synthetic dataset is small; per-case results are noisy and no significance claims are made."
+  ],
+  "disclaimer": "Synthetic clinical coding screening only. Not clinical advice, not a billing determination, and not validated for patient care. H1 differs from H2/H3 in orchestration, history access, and execution path, so harness contrasts are descriptive rather than causal. The dataset is small and gold codes are author-validated, not certified-coder-reviewed.",
+  "harness_runs": [
+    {
+      "id": 31,
+      "comparison_id": "cmp-20261023223448-ec980a",
+      "harness_id": "h1",
+      "commit": "938bb8bc6f0af21ab37a56a4a5e3a606f4655ab0",
+      "image": "clinical-coder-h1:cmp-20261023223448-ec980a-938bb8bc6f0a",
+      "container_name": "cc-cmp-20261023223448-ec980a-h1",
+      "status": "COMPLETED",
+      "log_tail": "{\"ts\":\"2026-10-23 22:35:12,884\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"worker ready slot=h1 stream=cc:jobs:cmp-20261023223448-ec980a:h1 group=workers consumer=h1-7456798f2690-2\"}\n{\"ts\":\"2026-10-23 22:35:27,583\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-0be714ce3b53cb62d630b6d6 case=C01 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:36,927\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-c7ccbab3dc7aa23f97fdb6ef case=C02 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:46,081\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-d51a89f45a0fa37383529703 case=C03 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:55,495\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-2d4abf05dc6e100e5c9ccb7c case=C04 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:05,681\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-51417a54c1070d535a8dfc9b case=C05 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:17,140\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-f60947f036828d2da9695026 case=C06 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:27,026\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-ed02d223fc800c4681225f40 case=C07 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:37,538\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-fba1e2f3b72a02aa2aaf4975 case=C08 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:48,270\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-f4f0c5dc4f3ac4970df55721 case=C09 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:36:58,928\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-92726440dd4dd19c875f6224 case=C10 status=COMPLETED\"}",
+      "error": null,
+      "created_at": "2026-10-23T22:34:49.491092+00:00",
+      "updated_at": "2026-10-23T22:36:59.344500+00:00"
+    },
+    {
+      "id": 33,
+      "comparison_id": "cmp-20261023223448-ec980a",
+      "harness_id": "h2",
+      "commit": "6c944766751ed773ceff0f6f33a5abb8ce7c5e4b",
+      "image": "clinical-coder-h2:cmp-20261023223448-ec980a-6c944766751e",
+      "container_name": "cc-cmp-20261023223448-ec980a-h2",
+      "status": "COMPLETED",
+      "log_tail": "{\"ts\":\"2026-10-23 22:35:13,973\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"worker ready slot=h2 stream=cc:jobs:cmp-20261023223448-ec980a:h2 group=workers consumer=h2-818abebe0aa8-2\"}\n{\"ts\":\"2026-10-23 22:35:16,039\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:16,966\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:16,974\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-14e701115e3a382f47dc7807 case=C01 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:17,974\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:18,965\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:18,967\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-039b1ed4e7e0f00e74d9ee75 case=C02 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:19,985\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:20,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:20,967\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-53f56c187ed98c6f09554c8b case=C03 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:21,977\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:22,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:22,968\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-bc59677886c81d1e598d7ae3 case=C04 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:23,970\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:24,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:24,968\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-b7d6b8c8fe0c1c1445e62065 case=C05 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:25,970\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:26,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:26,968\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-6133036b281123671f6b0434 case=C06 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:27,969\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:28,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:28,968\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-6d8dba30a71ec2a7a3ed219a case=C07 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:29,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:30,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:30,967\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-4f9381636b3d105119582bfe case=C08 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:31,971\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:32,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:32,966\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-535a9a9f330b516852c61843 case=C09 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:33,973\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:34,964\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:34,968\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-2817038be5765c58c63c9da5 case=C10 status=COMPLETED\"}",
+      "error": null,
+      "created_at": "2026-10-23T22:35:00.754471+00:00",
+      "updated_at": "2026-10-23T22:35:35.339070+00:00"
+    },
+    {
+      "id": 35,
+      "comparison_id": "cmp-20261023223448-ec980a",
+      "harness_id": "h3",
+      "commit": "517120c4c52e5049146bdd5a4560609424dd13b4",
+      "image": "clinical-coder-h3:cmp-20261023223448-ec980a-517120c4c52e",
+      "container_name": "cc-cmp-20261023223448-ec980a-h3",
+      "status": "COMPLETED",
+      "log_tail": "{\"ts\":\"2026-10-23 22:35:14,672\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"worker ready slot=h3 stream=cc:jobs:cmp-20261023223448-ec980a:h3 group=workers consumer=h3-db75ba5880f2-2\"}\n{\"ts\":\"2026-10-23 22:35:16,039\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:16,970\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:17,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:17,970\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-f93c110d49478bbd014e9547 case=C01 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:18,972\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:19,984\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:20,966\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:20,969\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-05965f06c86da293f31686c2 case=C02 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:21,972\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:22,970\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:23,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:23,971\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-aed51ae2d0f3a44bae36c270 case=C03 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:24,973\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:25,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:26,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:26,970\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-bea2c0198a88423a93f447f9 case=C04 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:27,972\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:28,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:29,966\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:30,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:31,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:31,971\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-f30201cae4ad059909878fcd case=C05 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:32,972\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:33,969\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:34,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:34,974\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-8f753cc98e040efa1509601f case=C06 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:35,973\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:36,967\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:37,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:37,971\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-ea8d2487dfe2ce5d44f64096 case=C07 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:38,971\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:39,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:40,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:40,970\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-df98d23739a1c8389652e274 case=C08 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:41,973\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:42,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:43,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:43,971\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-898fd1b9b7f9c534d26bd75a case=C09 status=COMPLETED\"}\n{\"ts\":\"2026-10-23 22:35:44,971\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:45,969\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:46,968\",\"level\":\"INFO\",\"logger\":\"httpx\",\"msg\":\"HTTP Request: POST http://mock-llm:4010/v1/chat/completions \"HTTP/1.1 200 OK\"\"}\n{\"ts\":\"2026-10-23 22:35:46,971\",\"level\":\"INFO\",\"logger\":\"clinical_coder.worker\",\"msg\":\"job done job=job-1bb94a8e274f6c3002973535 case=C10 status=COMPLETED\"}",
+      "error": null,
+      "created_at": "2026-10-23T22:35:05.712012+00:00",
+      "updated_at": "2026-10-23T22:35:47.269976+00:00"
+    }
+  ]
+}

@@ -545,7 +545,7 @@ onBeforeUnmount(() => window.clearTimeout(pollTimer));
         </div>
         <div>
           <div class="brand-name">Agent Harness Lab</div>
-          <div class="brand-sub">Multi-commit agent evals</div>
+          <div class="brand-sub">Dr. Saurabh Aggarwal</div>
         </div>
       </div>
 
@@ -577,11 +577,26 @@ onBeforeUnmount(() => window.clearTimeout(pollTimer));
       </div>
 
       <div class="sidebar-footer">
+        <div class="author-card">
+          <div class="author-badge-header">
+            <span class="author-icon">👨‍🔬</span>
+            <div class="author-details">
+              <strong class="author-name">Dr. Saurabh Aggarwal</strong>
+              <span class="author-role">Staff AI Scientist · 11+ yrs exp</span>
+            </div>
+          </div>
+          <p class="evaluation-notice">
+            This has been developed for the purpose of recruitment evaluation by
+            <a href="https://www.gohighlevel.com" target="_blank" rel="noopener noreferrer" class="highlevel-link">
+              HighLevel (https://www.gohighlevel.com)
+            </a>
+          </p>
+        </div>
         <div class="health-row">
           <span class="health-dot" :class="health?.status === 'ok' ? 'ok' : health?.status === 'degraded' ? 'warn' : 'bad'"></span>
           <span>API {{ health?.status || "unknown" }}</span>
         </div>
-        <p>Live LLM sandbox execution. Multi-commit architecture benchmarks. Zero mock data.</p>
+        <p class="sidebar-subtext">Multi-harness autonomous agent benchmarking platform. Zero mock data.</p>
       </div>
     </aside>
 
@@ -591,6 +606,13 @@ onBeforeUnmount(() => window.clearTimeout(pollTimer));
           <span>Agent harness platform</span>
           <span class="breadcrumb-sep">/</span>
           <span class="breadcrumb-current">{{ comparison?.name || "Task Studio" }}</span>
+          <div class="topbar-author-pill">
+            <span class="pill-badge">Recruitment Eval</span>
+            <span class="pill-text">
+              Dr. Saurabh Aggarwal for
+              <a href="https://www.gohighlevel.com" target="_blank" rel="noopener noreferrer">HighLevel</a>
+            </span>
+          </div>
         </div>
         <div class="topbar-actions">
           <button type="button" class="theme-toggle-btn" @click="toggleTheme" :title="theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
@@ -899,8 +921,14 @@ onBeforeUnmount(() => window.clearTimeout(pollTimer));
         <JobTable :jobs="jobs" @open="openJob" @retry-job="openRetryModal" />
 
         <footer class="page-footer">
-          <div>
-            <strong>Evaluation benchmark.</strong> Comparative agent harness lab for autonomous system testing, telemetry inspection, and iterative harness improvement.
+          <div class="footer-attribution-card">
+            <div class="footer-eval-notice">
+              <strong>Evaluation Platform by Dr. Saurabh Aggarwal (Staff AI Scientist, 11+ years experience).</strong><br />
+              This has been developed for the purpose of recruitment evaluation by
+              <a href="https://www.gohighlevel.com" target="_blank" rel="noopener noreferrer" class="footer-link">
+                HighLevel (https://www.gohighlevel.com)
+              </a>.
+            </div>
           </div>
           <div>
             Harness metrics reflect empirical runs on the designated test dataset. Check case-level logs and execution traces for qualitative verification.

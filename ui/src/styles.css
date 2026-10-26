@@ -557,6 +557,141 @@ pre {
   line-height: 1.55;
 }
 
+.author-card {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: var(--radius-sm, 8px);
+}
+
+[data-theme="dark"] .author-card {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.author-badge-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.author-icon {
+  font-size: 15px;
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.author-name {
+  color: var(--text, #f8fafc);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.author-role {
+  color: #6366f1;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+[data-theme="dark"] .author-role {
+  color: #a5b4fc;
+}
+
+.evaluation-notice {
+  margin: 0 !important;
+  color: var(--text-soft, #cbd5e1);
+  font-size: 10.5px !important;
+  line-height: 1.45 !important;
+}
+
+.highlevel-link,
+.footer-link {
+  color: #4f46e5;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+[data-theme="dark"] .highlevel-link,
+[data-theme="dark"] .footer-link {
+  color: #818cf8;
+}
+
+.highlevel-link:hover,
+.footer-link:hover {
+  color: #6366f1;
+}
+
+.sidebar-subtext {
+  margin-top: 8px;
+  color: var(--faint, #64748b);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.topbar-author-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 10px;
+  margin-left: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.pill-badge {
+  padding: 1px 6px;
+  background: #6366f1;
+  color: #ffffff;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.pill-text {
+  color: var(--text-soft, #94a3b8);
+  font-weight: 550;
+}
+
+.pill-text a {
+  color: #6366f1;
+  font-weight: 650;
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .pill-text a {
+  color: #a5b4fc;
+}
+
+.footer-attribution-card {
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  border-radius: 8px;
+}
+
+.footer-eval-notice {
+  color: var(--text, #1e293b);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .footer-eval-notice {
+  color: #e2e8f0;
+}
+
+
 /* ------------------------------------------------------------
    Top bar
    ------------------------------------------------------------ */

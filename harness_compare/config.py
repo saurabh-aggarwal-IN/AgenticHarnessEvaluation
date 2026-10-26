@@ -6,8 +6,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 DISCLAIMER = (
-    "Empirical agent harness evaluation benchmark. Contrasts between harnesses "
-    "are descriptive; evaluate qualitative traces alongside quantitative "
+    "Empirical agent harness evaluation benchmark developed by Dr. Saurabh Aggarwal "
+    "for the purpose of recruitment evaluation by HighLevel (https://www.gohighlevel.com). "
+    "Contrasts between harnesses are descriptive; evaluate qualitative traces alongside quantitative "
     "metrics when making agent architectural and deployment decisions."
 )
 

@@ -28,6 +28,9 @@ data/
 runs/
 logs/
 *.log
+live-run*.log
+live-comparison*.json
+gemma-*.json
 
 # OS artifacts
 .DS_Store

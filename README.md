@@ -2,7 +2,7 @@
 
 Build three commits of the clinical-coding harness repo, run the same synthetic
 dataset through all of them (optionally across several router models), evaluate
-each response deterministically, and expose radar data for a Vue UI.
+each response deterministically, and expose radar data and dynamic post-run reports for a Vue UI.
 
 > **Screening only.** This is not clinical advice, not a billing determination,
 > and not validated for patient care. The dataset is synthetic and small; the
@@ -28,40 +28,64 @@ Streams. Grading keys never leave the orchestrator process.
 ## Architecture
 
 ```
-FastAPI / CLI
+FastAPI / CLI / Vue UI (Task Studio)
     |  comparison record          Redis Stream cc:comparisons
     v                                      |
 Postgres  <---- runner / consumer <--------+
     |                |
     |                +--> git worktrees at h1/h2/h3 commits
     |                +--> docker build (one image per commit)
-    |                +--> private bridge network + one worker container per harness
+    |                +--> private bridge network + worker containers per harness
     |                              |
     |                              +--> Redis Stream cc:jobs:<cmp>:<h>
     |                              +--> Redis Stream cc:results:<cmp>
     |
-    +--> jobs, responses, deterministic evaluations, events, radar summary
+    +--> jobs, responses, deterministic evaluations, events, radar summary, dynamic report
 ```
 
-- **Postgres** owns comparison/job state, raw responses, evaluations, events,
+- **Postgres** owns comparison/job state, raw responses, evaluations, audit events,
   and the final radar summary.
 - **Redis Streams** carries queued comparisons, per-harness jobs, results, and
   worker heartbeats. Job consumers use consumer groups; the orchestrator reads
   results with a group and acknowledges every message.
 - **Docker CLI** is called directly. `docker compose` is not required, because
-  the development machine exposes a Podman `docker` shim without Compose.
+  the development machine exposes a Podman `docker` shim without Compose. Container
+  cleanups and safety ceilings are handled automatically.
+- **Web UI (Vue 3 + Vite)** provides interactive comparison management (Task Studio),
+  real-time progress tracking, 8-axis radar visualization, case-level trace inspector,
+  selective retry for failed tasks, and dynamic post-run reports.
+
+## Core Capabilities & New Features
+
+### 1. Granular & Bulk Failed Task Retries
+When LLM upstream rate limits (HTTP 429), quota limits, or network timeouts occur:
+- **Preserves Completed Tasks**: Already completed tasks (`COMPLETED`) and their metrics/token usages are never lost or re-executed.
+- **Bulk Retry**: Retry all failed, timed-out, or cancelled tasks across the entire comparison run with a single click.
+- **Single Task Retry**: Retry an individual failed task directly from the Case Table (🔄 button) or the Case Drawer error view.
+- **Credential & Gateway Update on Retry**: Update the gateway `base_url`, `api_key`, or `model` at retry time so retried jobs succeed on an alternative route or fresh key without starting from scratch.
+
+### 2. Dynamic In-UI Post-Run Report & Next-Harness Prompt
+- Automatically generated upon run completion or when completed tasks exist.
+- **Executive Summary & Radar Breakdown**: Synthesizes cross-harness strengths, accuracy (micro F1), safety flags, and latency/cost trade-offs.
+- **Prompt for Next Agent Harness**: Generates an exhaustive, actionable prompt customized to the run's empirical error modes, hallucinated codes, and architectural weaknesses—ready to hand off to coding agents (e.g. Claude, Cursor, Antigravity) to build the next iteration of the agentic harness.
+- Completely dynamic and generic: adapts to any dataset, case set, and model configuration without hardcoded mocks.
+
+### 3. Task Studio & Commit Verification
+- **Task Studio**: Create new comparison runs with customized commit SHAs, model selections, concurrency settings, and trials.
+- **Git Commit Verification**: Instant validation of commit SHAs locally or remotely against GitHub before kicking off builds.
+- **Worker Management**: Real-time worker health, container lifecycle management, and automatic dead-worker reaping.
 
 ## Quick start (host orchestrator)
 
 Requirements: Python 3.11+, Docker CLI (or Podman shim), git, and a reachable
-OpenAI-compatible router.
+OpenAI-compatible gateway (e.g. FreeLLMAPI, LiteLLM, Ollama, or direct API providers).
 
 ```powershell
 cd E:\HighLevel\HarnessComparison
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -e ".[dev]"
 Copy-Item .env.example .env   # edit credentials and URLs
-.\\.venv\\Scripts\\python -m harness_compare.cli infra up
+.\.venv\Scripts\python -m harness_compare.cli infra up
 ```
 
 Register the canonical synthetic dataset:
@@ -71,19 +95,18 @@ $env:ALLOW_LOCAL_DATASET = "true"
 .\.venv\Scripts\python -m harness_compare.cli dataset E:\HighLevel\Dataset --name synthetic-clinical-coding-v1
 ```
 
-Run a comparison. For a local repository, set `ALLOW_LOCAL_REPO=true`; for
-GitHub the host must be in `REPO_ALLOWED_HOSTS` (default `github.com`):
+Run a comparison via CLI:
 
 ```powershell
 $env:ALLOW_LOCAL_REPO = "true"
-$env:LLM_BASE_URL = "https://router.example.com/v1"
+$env:LLM_BASE_URL = "http://192.168.29.43:3001/v1"
 $env:LLM_API_KEY = "..."
 
 .\.venv\Scripts\python -m harness_compare.cli compare `
   --repo E:\HighLevel\ClinicalCoderAgent `
   --h1 938bb8b --h2 6c94476 --h3 517120c `
   --dataset-path E:\HighLevel\Dataset `
-  --model your-router/model-slug `
+  --model gemma-4-31b `
   --trials 1 `
   --out comparison.json
 ```
@@ -91,60 +114,76 @@ $env:LLM_API_KEY = "..."
 For the GitHub path, replace `--repo` with the URL and pass the full commit
 SHAs. The default allowlist rejects non-GitHub hosts.
 
-Start the API instead of running inline:
+Start the API and Background Worker:
 
 ```powershell
 .\.venv\Scripts\python -m harness_compare.cli infra up
 .\.venv\Scripts\python -m harness_compare.api
-# or: .\.venv\Scripts\python -m harness_compare.worker
+# In another terminal:
+.\.venv\Scripts\python -m harness_compare.cli worker
 ```
 
-API docs live at `http://127.0.0.1:8080/docs`.
+Launch the Vue UI:
 
-## API
+```powershell
+cd E:\HighLevel\HarnessComparison\ui
+npm install
+npm run dev
+```
+
+The Web UI will be available at `http://localhost:5173/`, and API docs live at `http://127.0.0.1:8080/docs`.
+
+## API Endpoints
 
 Set `ORCH_API_TOKEN` to require `Authorization: Bearer <token>` on every `/v1`
 route. `/health` is unauthenticated.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/health` | DB, Redis, Docker health |
-| `GET` | `/v1/meta` | radar axes, harness descriptions, limits |
-| `GET` | `/v1/datasets` | registered datasets |
-| `POST` | `/v1/datasets` | register a server path (requires `ALLOW_LOCAL_DATASET=true`) |
-| `POST` | `/v1/datasets/upload` | upload a dataset zip |
-| `POST` | `/v1/comparisons` | create and queue a comparison |
-| `GET` | `/v1/comparisons` | list comparisons |
-| `GET` | `/v1/comparisons/{id}` | status, progress, summary |
-| `GET` | `/v1/comparisons/{id}/jobs` | filterable job results |
-| `GET` | `/v1/comparisons/{id}/events` | audit/timeline events |
-| `GET` | `/v1/comparisons/{id}/radar` | radar series, aggregates, paired deltas |
-| `GET` | `/v1/comparisons/{id}/export` | summary JSON download |
-| `POST` | `/v1/comparisons/{id}/cancel` | cooperative cancellation |
+| `GET` | `/health` | DB, Redis, Docker health status |
+| `GET` | `/v1/meta` | Radar axes, harness descriptions, limits |
+| `GET` | `/v1/datasets` | List registered datasets |
+| `POST` | `/v1/datasets` | Register a server path (requires `ALLOW_LOCAL_DATASET=true`) |
+| `POST` | `/v1/datasets/upload` | Upload a dataset zip file |
+| `POST` | `/v1/comparisons` | Create and queue a comparison run |
+| `GET` | `/v1/comparisons` | List comparisons |
+| `GET` | `/v1/comparisons/{id}` | Status, progress, and summary |
+| `DELETE` | `/v1/comparisons/{id}` | Permanently delete comparison, jobs, events, and metrics |
+| `POST` | `/v1/comparisons/{id}/retry` | Retry failed/timed-out tasks (optional gateway override) |
+| `POST` | `/v1/comparisons/{id}/retry-failed` | Alias for retry comparison endpoint |
+| `POST` | `/v1/comparisons/{id}/retry-orphaned`| Re-enqueue orphaned or interrupted comparison |
+| `POST` | `/v1/comparisons/{id}/jobs/{job_id}/retry` | Retry an individual failed task |
+| `GET` | `/v1/comparisons/{id}/jobs` | Filterable case-level job results |
+| `DELETE` | `/v1/comparisons/{id}/jobs` | Delete all jobs for a comparison |
+| `GET` | `/v1/comparisons/{id}/events` | Audit/timeline events |
+| `GET` | `/v1/comparisons/{id}/radar` | Radar series, 8-axis normalized metrics, paired deltas |
+| `GET` | `/v1/comparisons/{id}/export` | Export comparison (JSON or CSV via `?format=csv`) |
+| `POST` | `/v1/comparisons/{id}/cancel` | Cooperative cancellation of active run |
+| `POST` | `/v1/git/verify-commit` | Check if a git commit SHA is accessible locally/remotely |
+| `POST` | `/v1/gateway/models` | List models available on the configured LLM gateway |
+| `POST` | `/v1/workers/unit/start` | Manually start a standalone worker container |
+| `POST` | `/v1/workers/unit/stop` | Stop a standalone worker container |
+| `POST` | `/v1/workers/kill-all` | Clean up all active worker containers |
 
-A comparison body:
+### Retry Request Payload
+
+To retry failed tasks with updated credentials or endpoints:
 
 ```json
+POST /v1/comparisons/cmp-12345/retry
+Content-Type: application/json
+
 {
-  "name": "synthetic screening run",
-  "repo_url": "https://github.com/org/repo",
-  "commits": {
-    "h1": "938bb8b...",
-    "h2": "6c94476...",
-    "h3": "517120c..."
-  },
-  "dataset_id": "ds-...",
-  "models": ["router/model-a", "router/model-b"],
-  "trials": 2,
-  "budget": {
-    "max_llm_calls": 8,
-    "max_wall_seconds": 180,
-    "max_cost_usd": 1.0
+  "job_ids": ["job-abc"],       // Optional: omit to retry all failed/timeout tasks
+  "gateway": {                  // Optional: update gateway configuration
+    "base_url": "http://192.168.29.43:3001/v1",
+    "api_key": "new-secret-key",
+    "model": "gemma-4-31b"
   }
 }
 ```
 
-## Evaluation
+## Evaluation Metrics
 
 Scores are deterministic and do not call an LLM judge.
 
@@ -171,8 +210,8 @@ encounter note only; H2/H3 can additionally read the history fixture but a
 snippet sourced only from history does not count as note provenance.
 
 Paired deltas are descriptive (b minus a on identical case/trial pairs) and
-carry no significance claim. The UI should show the disclaimer and the H1
-confounding note next to every radar.
+carry no significance claim. The UI shows the disclaimer and the H1
+confounding note next to every radar and report.
 
 ## Isolation and safety
 
@@ -217,48 +256,20 @@ The Postgres and Redis containers can be created with
 `python -m harness_compare.cli infra up`; they persist in the `cc-pgdata` and
 `cc-redisdata` named volumes.
 
-## Live LLM Execution & Zero-Mock Policy
+## Live LLM Execution & Gateway Configuration
 
 This platform enforces a strict **Zero-Mock Policy** for evaluations:
-- All harness runs make live inference calls against an OpenAI-compatible router or local Ollama endpoint.
-- For our live evaluation, the system connects to the local Ollama / freeLLMAPI router at `http://192.168.29.43:3001/v1` serving `gemma-4-31b`.
-- The worker containers route directly to the host network address (`http://192.168.29.43:3001/v1`).
+- All harness runs make live inference calls against an OpenAI-compatible gateway (e.g. [FreeLLMAPI](https://github.com/tashfeenahmed/freellmapi), LiteLLM, Ollama, or direct model providers).
+- Worker containers route directly to the host network address.
 - All comparisons, metrics, and radar charts in the dashboard reflect genuine, non-deterministic agent tool executions.
 
-Configure in `.env`:
+Example `.env` gateway configuration:
 ```text
 LLM_BASE_URL=http://192.168.29.43:3001/v1
 WORKER_LLM_BASE_URL=http://192.168.29.43:3001/v1
-LLM_API_KEY=freellmapi-25c013abda015aebe25ddfe5e5911208d11a243079111ef6
+LLM_API_KEY=your-api-key
 DEFAULT_MODELS=gemma-4-31b
 ```
-
-## Running Live Comparisons via UI or CLI
-
-1. Push the three harness commits. The three SHAs must all exist in the same
-   repository; the orchestrator checks each one out in its own worktree.
-2. Configure a real router and keep local-path access off:
-
-   ```text
-   ALLOW_LOCAL_REPO=false
-   ALLOW_LOCAL_DATASET=false
-   REPO_ALLOWED_HOSTS=github.com,www.github.com
-   GIT_TOKEN=...                 # only for a private repository
-   LLM_BASE_URL=https://router.example.com/v1
-   LLM_API_KEY=...
-   WORKER_LLM_BASE_URL=          # defaults to LLM_BASE_URL
-   DEFAULT_MODELS=provider/model-a,provider/model-b
-   ```
-
-3. Start Postgres/Redis (`python -m harness_compare.cli infra up`), the API
-   (`python -m harness_compare.api`), and the worker
-   (`python -m harness_compare.cli worker`).
-4. Register the dataset through `POST /v1/datasets/upload`, not by server path.
-5. Create the comparison with `repo_url`, the three commit SHAs, `dataset_id`,
-   `models`, and `trials`; poll `/v1/comparisons/{id}/radar` for the result.
-
-Keep the screening disclaimer and the H1-confounding note attached to every
-export. The radar is descriptive, not a causal or clinical claim.
 
 ## Tests
 
@@ -267,24 +278,11 @@ cd E:\HighLevel\HarnessComparison
 .\.venv\Scripts\python -m pytest -q
 ```
 
-The suite covers dataset validation and zip safety, deterministic evaluation
-and radar aggregation, history-availability semantics, API request validation,
-Docker/git command construction, model/commit validation, the deterministic
-mock router, and the runner's job planning and failure isolation helpers.
-
-## Current limitations
-
-- Gold codes are author-validated, not certified-coder-reviewed.
-- No certified coder adjudication, no real claims data, no PHI.
-- H1 is a real Hermes CLI, but its result bundle also differs from H2/H3 by
-  history access and orchestration. It cannot isolate "Hermes vs LangGraph".
-- The H1 base image is currently `nousresearch/hermes-agent:latest`, not a
-  digest. Pin it before archival or comparison runs that must be reproducible.
-- Evaluations run against live LLM endpoints. Non-deterministic sampling can result in variance across runs.
-- The canonical dataset has only one history-specific gold code (C06), so the
-  history-specificity axis is a single-case signal.
-- The dataset is intentionally small. Per-case results are noisy; radar values
-  are screening signals.
-- The orchestrator assumes one active runner per comparison. Redis consumer
-  groups keep work from being duplicated, and orphaned RUNNING comparisons are
-  failed on startup.
+The test suite covers:
+- Dataset validation and zip traversal safety
+- Deterministic evaluation and 8-axis radar aggregation
+- History-availability and provenance semantics
+- API request validation and full retry endpoints
+- Docker and Git command construction
+- Failure isolation, worker recovery, and retry job preservation
+- Deterministic mock router and live LLM gateway contract

@@ -75,10 +75,191 @@ When LLM upstream rate limits (HTTP 429), quota limits, or network timeouts occu
 - **Git Commit Verification**: Instant validation of commit SHAs locally or remotely against GitHub before kicking off builds.
 - **Worker Management**: Real-time worker health, container lifecycle management, and automatic dead-worker reaping.
 
-## Quick start (host orchestrator)
+## One-Click Platform Scripts (`start_platform` / `stop_platform`)
 
-Requirements: Python 3.11+, Docker CLI (or Podman shim), git, and a reachable
-OpenAI-compatible gateway (e.g. FreeLLMAPI, LiteLLM, Ollama, or direct API providers).
+The evaluation platform includes unified automation scripts to launch or terminate the entire ecosystem with a single command.
+
+### Scripts Location
+
+You can run the platform launchers from either the root workspace or the repository scripts folder:
+
+| Location | Start Platform | Stop Platform |
+| --- | --- | --- |
+| **Workspace Root** (`E:\HighLevel`) | `.\start_platform.bat` *(or `.\start_platform.ps1`)* | `.\stop_platform.bat` *(or `.\stop_platform.ps1`)* |
+| **Repo Scripts** (`HarnessComparison\scripts`) | `.\scripts\start_platform.bat` | `.\scripts\stop_platform.bat` |
+
+### What the Launcher Does Automatically
+
+Running `.\start_platform.bat`:
+1. **Validates Python & Node Environments**: Verifies virtual environments and UI packages with automatic workspace root resolution.
+2. **Starts Infrastructure Services**: Spins up **PostgreSQL 16** (`:55432`) and **Redis 7** (`:56379`) via Docker/Podman (`cc-postgres` and `cc-redis`).
+3. **Launches FreeLLMAPI Gateway & Router**: Starts the local OpenAI-compatible inference router on `http://127.0.0.1:3001` (serving models such as `gemma-4-31b`).
+4. **Starts Control Plane API**: Runs FastAPI orchestrator service on `http://127.0.0.1:8080`.
+5. **Starts Async Worker Runner**: Starts background Redis Streams consumer for distributed evaluation jobs.
+6. **Starts Local Agent Service**: Starts `clinical_coder.api:app` on `http://127.0.0.1:8081` if the agent repository is present on disk.
+7. **Launches Vue 3 + Vite Dashboard**: Boots the interactive web dashboard on `http://localhost:5173/`.
+8. **Health Check & Verification**: Polls all endpoints, prints a readiness summary, and tracks PIDs in `.platform_pids.json`.
+
+### Zero-Prerequisite Launch Resilience
+
+> [!NOTE]
+> **No Pre-Cloned Repositories Required**: Evaluators do **not** need to pre-download the agent repository or know its GitHub link before starting the platform. The launcher automatically boots in **Standalone Evaluation Mode**. When you specify the GitHub link and commit IDs in the UI, the platform automatically clones and downloads the specific commit code trees onto disk on demand!
+
+To gracefully shut down all services, containers, and background processes:
+```powershell
+.\stop_platform.bat
+```
+
+---
+
+## Interactive Task Studio Guide (Step 1, Step 2, and Step 3)
+
+The **Task Studio** (`http://localhost:5173/`) allows evaluators to configure, initiate, and run multi-harness benchmarks.
+
+### Quick Preset Shortcut
+In the top-right corner of Task Studio, click **🏥 Clinical Preset** to instantly populate all fields with canonical ClinicalCoderApp settings.
+
+---
+
+### Step 1: GitHub Repository & Architecture Commits
+
+In **Step 1**, specify the target agent repository and the architecture commit revisions to benchmark.
+
+1. **GitHub Repository Link**:
+   ```text
+   https://github.com/saurabh-aggarwal-IN/ClinicalCoderApp.git
+   ```
+2. **Project / Evaluation Name**:
+   ```text
+   Clinical Coding Multi-Harness Evaluation
+   ```
+3. **Architecture Commit Revisions (Up to 3 Slots: H1, H2, H3)**:
+
+   | Harness Slot | Architecture Label | Canonical Commit ID | Architectural Characteristics |
+   | --- | --- | --- | --- |
+   | **H1 (Baseline)** | `Baseline: Direct Hermes CLI` | `938bb8b` | Single-pass Hermes CLI direct prompt execution. Zero access to patient history fixtures. Minimal latency, high omission rate on chronic conditions. |
+   | **H2 (Evolution 1)** | `Evolution 1: LangGraph Planner -> Coder -> Verifier` | `517120c` *(or `6c94476`)* | Two/three-stage LangGraph state machine with patient history fixture access, intermediate reasoning plan, and verifier pass. |
+   | **H3 (Evolution 2)** | `Evolution 2: LangGraph Multi-Agent Specialist Loop` | `5bf9d16` *(or `c325be7`)* | Full multi-agent specialist architecture with standardized schema notation, strict ICD-10 trap avoidance, and HTTP 429 adaptive backoff. |
+
+4. **Instant Commit Verification & Auto-Download to Disk**:
+   - As soon as you enter a commit SHA and click **🔍 Verify** (or move focus away from the input field), the platform:
+     - Validates the commit locally against disk cache (`E:\HighLevel\ClinicalCoderAgent` or `data/repo_cache`).
+     - If the code is not on disk, it queries GitHub and runs `git fetch --depth 1 origin <sha>` automatically.
+     - Displays status badges:
+       - `⚡ Downloaded to disk`: Code tree fetched from GitHub directly into local disk cache.
+       - `💾 Ready on disk`: Code already present locally.
+       - Displays verified author, date, commit message, and local directory path.
+     - Automatically launches the local agent API on port `:8081` once downloaded.
+5. **Initiate Docker & Redis Workers**:
+   - Click **🚀 Initiate Redis & Docker Workers** (or individual **▶ Start** buttons per slot).
+   - The platform allocates an isolated container sandbox for each commit and binds it to private Redis stream queues (`cc:jobs:<cmp>:h1`, etc.).
+
+---
+
+### Step 2: Target Agent API Endpoint (Universal Contract)
+
+In **Step 2**, configure the universal API endpoint common across all commit revisions.
+
+1. **API Link / Endpoint URL**:
+   ```text
+   /v1/code
+   ```
+   *(or full URL: `http://127.0.0.1:8081/v1/code`)*
+2. **HTTP Method**:
+   ```text
+   POST
+   ```
+3. **Universal Contract Principle**:
+   - The caller sends an identical payload regardless of harness:
+     ```json
+     {
+       "case_id": "C01",
+       "note": "Patient presents with...",
+       "patient_history": "History of...",
+       "model": "gemma-4-31b"
+     }
+     ```
+   - Standardized expected response:
+     ```json
+     {
+       "approved_codes": ["E11.9", "I50.9"],
+       "rejected_codes": ["I10"],
+       "rationale": "..."
+     }
+     ```
+   - The checked-out commit inside each worker container determines whether H1, H2, or H3 architecture executes.
+
+---
+
+### Step 3: Synthetic Test Dataset & Ground Truth Reference Paths
+
+In **Step 3**, supply the file paths to the synthetic clinical encounter cases and ground truth evaluations.
+
+1. **Synthetic Dataset (Cases) Folder**:
+   ```text
+   Dataset/cases
+   ```
+   *(or absolute path: `E:\HighLevel\Dataset\cases`)*
+2. **Ground Truth Reference Folder**:
+   ```text
+   Dataset/expected
+   ```
+   *(or absolute path: `E:\HighLevel\Dataset\expected`)*
+
+---
+
+### Step 4 & Step 5: Metrics & LLM Gateway Configuration
+
+- **Step 4 (Evaluation Metrics)**: Select benchmark dimensions including **Output Accuracy & F1**, **Exact Set Match**, **Guardrail Safety & Trap Avoidance**, **Source Provenance**, **Execution Latency**, **Token Cost**, and domain custom metrics (**Longitudinal Context Retention**, **Medical Upcoding Traps**).
+- **Step 5 (Gateway & Model)**:
+  - Select **FreeLLMAPI** (`http://192.168.29.43:3001/v1` or `http://127.0.0.1:3001/v1`), **OpenRouter**, or **TrueFoundry**.
+  - Select model: `gemma-4-31b` (or pass per-harness models).
+- Click **⚡ Run Multi-Harness Analysis** to start the evaluation.
+
+---
+
+## Synthetic Clinical Coding Dataset Reference
+
+The benchmark dataset is located at `E:\HighLevel\Dataset` and structured as follows:
+
+```
+Dataset/
+├── cases/                     # Synthetic clinical encounter notes (JSON)
+│   ├── C01-t2dm-chf-ekg.json
+│   ├── C02-t2dm-ckd-stage3.json
+│   ├── C03-chf-copd-exacerbation.json
+│   ├── C04-htn-ckd-stage2.json
+│   ├── C05-historical-copd-trap.json
+│   ├── C06-kidney-transplant-followup.json
+│   ├── C07-strep-pharyngitis.json
+│   ├── C08-uncomplicated-uti.json
+│   ├── C09-right-knee-oa.json
+│   └── C10-recurrent-mdd.json
+├── expected/                  # Ground truth gold codes & safety traps (JSON)
+│   ├── C01.expected.json ... C10.expected.json
+├── schema/                    # JSON Schema specifications
+│   ├── case.schema.json
+│   ├── expected-output.schema.json
+│   └── agent-output.schema.json
+├── manifest.json              # Dataset versioning and metadata
+└── checksums.json             # SHA256 integrity checksums
+```
+
+### Key Evaluation Cases & Traps
+
+- **C01 (`C01-t2dm-chf-ekg`)**: Multi-morbidity case with Type 2 Diabetes Mellitus, congestive heart failure, and routine EKG. Tests CPT code capture and secondary diagnosis sequencing.
+- **C02 (`C02-t2dm-ckd-stage3`)**: Chronic Kidney Disease (CKD Stage 3a) in a diabetic patient. Requires proper ICD-10 combination coding (`E11.22`, `N18.31`).
+- **C03 (`C03-chf-copd-exacerbation`)**: Acute cardiopulmonary decompensation testing exclusion guidelines between acute pulmonary edema and acute exacerbation of chronic obstructive bronchitis.
+- **C04 (`C04-htn-ckd-stage2`)**: Hypertensive nephropathy testing causal relationship rules between hypertension and mild CKD (`I12.9`, `N18.2`).
+- **C05 (`C05-historical-copd-trap`)**: **Safety Trap Case**. Encounter note mentions past resolved condition. Strictly tests whether the agent falls into the trap of coding historical/inactive diagnoses.
+- **C06 (`C06-kidney-transplant-followup`)**: **Longitudinal History Retention**. Tests whether the agent properly incorporates status code `Z94.0` (kidney transplant status) available only in the patient history fixture.
+- **C07–C10**: Outpatient and specialty cases covering acute pharyngitis, uncomplicated cystitis, unilateral degenerative osteoarthritis, and recurrent major depressive disorder.
+
+---
+
+## Manual CLI Execution (Alternative to UI)
+
+Requirements: Python 3.11+, Docker CLI (or Podman shim), git, and an OpenAI-compatible gateway.
 
 ```powershell
 cd E:\HighLevel\HarnessComparison
@@ -88,50 +269,26 @@ Copy-Item .env.example .env   # edit credentials and URLs
 .\.venv\Scripts\python -m harness_compare.cli infra up
 ```
 
-Register the canonical synthetic dataset:
-
+Register the synthetic dataset:
 ```powershell
 $env:ALLOW_LOCAL_DATASET = "true"
 .\.venv\Scripts\python -m harness_compare.cli dataset E:\HighLevel\Dataset --name synthetic-clinical-coding-v1
 ```
 
-Run a comparison via CLI:
-
+Run comparison via CLI:
 ```powershell
 $env:ALLOW_LOCAL_REPO = "true"
 $env:LLM_BASE_URL = "http://192.168.29.43:3001/v1"
-$env:LLM_API_KEY = "..."
+$env:LLM_API_KEY = "freellmapi-25c013abda015aebe25ddfe5e5911208d11a243079111ef6"
 
 .\.venv\Scripts\python -m harness_compare.cli compare `
   --repo E:\HighLevel\ClinicalCoderAgent `
-  --h1 938bb8b --h2 6c94476 --h3 517120c `
+  --h1 938bb8b --h2 517120c --h3 5bf9d16 `
   --dataset-path E:\HighLevel\Dataset `
   --model gemma-4-31b `
   --trials 1 `
   --out comparison.json
 ```
-
-For the GitHub path, replace `--repo` with the URL and pass the full commit
-SHAs. The default allowlist rejects non-GitHub hosts.
-
-Start the API and Background Worker:
-
-```powershell
-.\.venv\Scripts\python -m harness_compare.cli infra up
-.\.venv\Scripts\python -m harness_compare.api
-# In another terminal:
-.\.venv\Scripts\python -m harness_compare.cli worker
-```
-
-Launch the Vue UI:
-
-```powershell
-cd E:\HighLevel\HarnessComparison\ui
-npm install
-npm run dev
-```
-
-The Web UI will be available at `http://localhost:5173/`, and API docs live at `http://127.0.0.1:8080/docs`.
 
 ## API Endpoints
 

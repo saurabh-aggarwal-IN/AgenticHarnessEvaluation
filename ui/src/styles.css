@@ -4875,6 +4875,60 @@ pre {
   margin-top: 2px;
 }
 
+.badge-disk {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+
+.badge-downloaded {
+  background: rgba(13, 148, 136, 0.15);
+  color: #0f766e;
+  border: 1px solid rgba(13, 148, 136, 0.3);
+}
+
+[data-theme="dark"] .badge-downloaded {
+  background: rgba(13, 148, 136, 0.25);
+  color: #5eead4;
+  border-color: rgba(94, 234, 212, 0.35);
+}
+
+.badge-cached {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+[data-theme="dark"] .badge-cached {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border-color: rgba(147, 197, 253, 0.3);
+}
+
+.verify-path {
+  font-size: 10.5px;
+  color: var(--text-soft, #64748b);
+  margin-top: 2px;
+}
+
+.verify-path code {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+[data-theme="dark"] .verify-path code {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+}
+
 .commit-verify-error {
   display: flex;
   align-items: center;

@@ -504,6 +504,12 @@ async function verifyCommitSlot(c) {
   }
 }
 
+function handleCommitBlur(c) {
+  if (c.sha?.trim() && !c.verified && !c.verifying) {
+    verifyCommitSlot(c);
+  }
+}
+
 // Per-Commit Worker Unit Start / Stop
 async function startWorkerSlot(c) {
   if (!c.sha?.trim()) {
@@ -582,6 +588,18 @@ async function initiateWorkers() {
   initiatingWorkers.value = true;
   workerError.value = "";
   try {
+    // Ensure all commit codes are verified and downloaded to disk before moving on
+    for (const c of activeCommits) {
+      if (!c.verified) {
+        await verifyCommitSlot(c);
+        if (c.verifyError) {
+          workerError.value = `Verification / download failed for ${c.label || c.id.toUpperCase()}: ${c.verifyError}`;
+          initiatingWorkers.value = false;
+          return;
+        }
+      }
+    }
+
     const res = await api.initiateWorkers({
       repo_url: repoUrl.value.trim(),
       commits: activeCommits.map((c) => c.sha.trim()),
@@ -709,6 +727,18 @@ async function runAnalysis() {
 
   submitting.value = true;
   error.value = "";
+
+  // Ensure all active commit codes are verified and downloaded to disk before benchmark launch
+  for (const c of activeCommits) {
+    if (!c.verified) {
+      await verifyCommitSlot(c);
+      if (c.verifyError) {
+        error.value = `Cannot run analysis: commit '${c.sha}' could not be verified or downloaded: ${c.verifyError}`;
+        submitting.value = false;
+        return;
+      }
+    }
+  }
 
   // If commits are fewer than 3, ensure keys exist for CommitSet
   const commitPayload = {
@@ -968,6 +998,7 @@ async function runAnalysis() {
                       class="mono-input"
                       required
                       @input="c.verified = null; c.verifyError = ''"
+                      @blur="handleCommitBlur(c)"
                     />
                   </div>
 
@@ -978,13 +1009,13 @@ async function runAnalysis() {
                       class="btn ghost small btn-verify"
                       :disabled="c.verifying || !c.sha?.trim()"
                       @click="verifyCommitSlot(c)"
-                      title="Verify if this git commit ID can be accessed"
+                      title="Verify and automatically download code to local disk if missing"
                     >
                       <svg v-if="c.verifying" viewBox="0 0 20 20" class="spin" style="width:13px;height:13px;margin-right:4px;">
                         <path d="M10 2v3m0 10v3m8-8h-3M5 10H2m13.7-5.7-2.1 2.1M6.4 13.6l-2.1 2.1m11.4 0-2.1-2.1M6.4 6.4 4.3 4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                       </svg>
                       <span v-else style="margin-right:4px;">🔍</span>
-                      {{ c.verifying ? "Checking..." : "Verify" }}
+                      {{ c.verifying ? "Checking & Downloading..." : "Verify" }}
                     </button>
 
                     <!-- Start / Stop Button -->
@@ -1023,9 +1054,14 @@ async function runAnalysis() {
                 <div v-if="c.verified" class="commit-verify-success">
                   <span class="verify-icon">✓</span>
                   <div class="verify-meta">
-                    <span class="verify-title">Accessible commit: <code>{{ c.verified.full_sha?.slice(0, 10) || c.sha }}</code></span>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                      <span class="verify-title">Accessible commit: <code>{{ c.verified.full_sha?.slice(0, 10) || c.sha }}</code></span>
+                      <span v-if="c.verified.downloaded" class="badge-disk badge-downloaded">⚡ Downloaded to disk</span>
+                      <span v-else-if="c.verified.cached_locally" class="badge-disk badge-cached">💾 Ready on disk</span>
+                    </div>
                     <span v-if="c.verified.author" class="verify-sub">by {{ c.verified.author }} · {{ c.verified.date }}</span>
                     <span v-if="c.verified.message" class="verify-msg">"{{ c.verified.message }}"</span>
+                    <span v-if="c.verified.local_path" class="verify-path">Local directory: <code>{{ c.verified.local_path }}</code></span>
                   </div>
                 </div>
 

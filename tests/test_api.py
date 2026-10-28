@@ -341,6 +341,9 @@ def test_verify_git_commit(fake_ctx: FakeContext) -> None:
         assert data["accessible"] is True
         assert data["full_sha"].startswith("938bb8b")
         assert "Add shared harness foundation" in (data["message"] or "")
+        assert data["cached_locally"] is True
+        assert data["local_path"] is not None
+        assert "ClinicalCoderAgent" in data["local_path"]
 
         # Inaccessible commit
         res_bad = client.post(

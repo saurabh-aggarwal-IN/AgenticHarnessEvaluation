@@ -8,6 +8,8 @@ import logging
 import os
 import re
 import secrets
+import subprocess
+import sys
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -313,6 +315,31 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
             workers=workers,
         )
 
+    async def _ensure_agent_service(clinical_dir: Path) -> None:
+        try:
+            async with httpx.AsyncClient(timeout=1.0) as client:
+                resp = await client.get("http://127.0.0.1:8081/health")
+                if resp.status_code == 200:
+                    return
+        except Exception:
+            pass
+
+        py_exec = clinical_dir / ".venv" / "Scripts" / "python.exe"
+        if not py_exec.exists():
+            py_exec = Path(sys.executable)
+        api_file = clinical_dir / "clinical_coder" / "api.py"
+        if api_file.exists():
+            try:
+                subprocess.Popen(
+                    [str(py_exec), "-m", "uvicorn", "clinical_coder.api:app", "--host", "127.0.0.1", "--port", "8081"],
+                    cwd=str(clinical_dir),
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                logger.info("Auto-spawned Clinical Coder Agent API on :8081")
+            except Exception as exc:
+                logger.debug("Auto-spawn agent service notice: %s", exc)
+
     @api.post("/git/verify-commit", response_model=GitVerifyCommitOut)
     async def verify_git_commit(body: GitVerifyCommitIn) -> GitVerifyCommitOut:
         commit_raw = body.commit.strip()
@@ -357,6 +384,8 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                     text = stdout.decode("utf-8", errors="replace").strip()
                     parts = text.split("|", 3)
                     if len(parts) >= 4:
+                        if ("clinicalcoder" in body.repo_url.lower() or "clinical" in body.repo_url.lower()) and clinical_local.exists():
+                            asyncio.create_task(_ensure_agent_service(clinical_local))
                         return GitVerifyCommitOut(
                             accessible=True,
                             commit=commit_raw,
@@ -423,8 +452,15 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
         # 3. Determine target local repository to download commit code into
         target_ref = resolved_sha or commit_raw
         target_repo: Path
-        if clinical_local.exists() and ("clinicalcoder" in body.repo_url.lower()):
+        is_clinical = ("clinicalcoder" in body.repo_url.lower()) or ("clinical" in body.repo_url.lower())
+        if is_clinical:
             target_repo = clinical_local
+            if not target_repo.exists() or not (target_repo / ".git").exists():
+                target_repo.mkdir(parents=True, exist_ok=True)
+                init_p = await asyncio.create_subprocess_exec("git", "init", "-q", cwd=str(target_repo))
+                await init_p.communicate()
+                rem_p = await asyncio.create_subprocess_exec("git", "remote", "add", "origin", body.repo_url, cwd=str(target_repo))
+                await rem_p.communicate()
         else:
             repo_cache_dir = cfg.data_dir / "repo_cache"
             repo_cache_dir.mkdir(parents=True, exist_ok=True)
@@ -479,7 +515,7 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                 text = vstdout.decode("utf-8", errors="replace").strip()
                 parts = text.split("|", 3)
                 if len(parts) >= 4:
-                    return GitVerifyCommitOut(
+                    res_obj = GitVerifyCommitOut(
                         accessible=True,
                         commit=commit_raw,
                         full_sha=parts[0].strip(),
@@ -490,6 +526,9 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                         downloaded=True,
                         local_path=str(target_repo),
                     )
+                    if is_clinical:
+                        asyncio.create_task(_ensure_agent_service(target_repo))
+                    return res_obj
         except Exception as exc:
             logger.debug("Post-fetch verification failed: %s", exc)
 

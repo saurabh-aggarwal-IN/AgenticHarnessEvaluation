@@ -1,0 +1,72 @@
+{
+  "caseId": "C08",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "N39.0",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Urinary tract infection, site not specified",
+      "snippet": "uncomplicated urinary tract infection",
+      "snippetSource": "encounter_note",
+      "rationale": "The note diagnoses an uncomplicated urinary tract infection without pyelonephritis."
+    },
+    {
+      "code": "81002",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Urinalysis, dipstick, without microscopy",
+      "snippet": "urine dipstick is positive for leukocyte esterase and nitrite",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a urine dipstick without microscopy, which maps to 81002."
+    },
+    {
+      "code": "87086",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Urine culture, quantitative colony count",
+      "snippet": "quantitative urine culture was sent",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a quantitative urine culture, which maps to 87086."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "N10",
+      "reason": "Acute pyelonephritis is not supported; no fever, flank pain, or CVA tenderness."
+    },
+    {
+      "code": "N39.3",
+      "reason": "Stress incontinence is not documented."
+    },
+    {
+      "code": "R30.0",
+      "reason": "Dysuria is a symptom; the diagnosis is more specific."
+    },
+    {
+      "code": "87088",
+      "reason": "The note documents a quantitative culture, not isolation/identification of an isolate."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": false
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests a diagnosis plus two procedure codes, including the 81002 vs 81003 distinction."
+}

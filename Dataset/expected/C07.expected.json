@@ -1,0 +1,59 @@
+{
+  "caseId": "C07",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "J02.0",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Streptococcal pharyngitis",
+      "snippet": "group A streptococcal pharyngitis",
+      "snippetSource": "encounter_note",
+      "rationale": "The note explicitly diagnoses group A streptococcal pharyngitis."
+    },
+    {
+      "code": "87880",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Rapid strep antigen test",
+      "snippet": "rapid antigen detection test for group A streptococcus is positive",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a rapid antigen detection test for group A streptococcus."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "J02.9",
+      "reason": "Unspecified pharyngitis; the organism is documented as group A streptococcus."
+    },
+    {
+      "code": "J03.90",
+      "reason": "Acute tonsillitis is not the documented diagnosis."
+    },
+    {
+      "code": "R07.0",
+      "reason": "Sore throat is a symptom; the diagnosis is more specific."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": false
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests a common infectious-disease diagnosis plus a point-of-care procedure code."
+}

@@ -1,0 +1,47 @@
+{
+  "caseId": "C09",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Right knee osteoarthritis with three-view X-ray",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "62-year-old male presents with six months of right knee pain that worsens with stairs and walking. He denies locking, instability, or recent trauma. Examination: right knee crepitus, mild effusion, and no ligamentous instability. A three-view X-ray of the right knee shows joint space narrowing and osteophytes. Assessment: primary osteoarthritis of the right knee. He was advised on physical therapy and topical NSAIDs.",
+  "history": {
+    "patientId": "SYN-C09",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C09-001",
+        "date": "2026-01-14",
+        "setting": "office",
+        "diagnoses": [
+          "M25.561"
+        ],
+        "procedures": []
+      }
+    ],
+    "activeHccs": [],
+    "activeConditions": []
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "orthopedics / primary care",
+    "difficulty": "easy",
+    "tags": [
+      "extra",
+      "procedure",
+      "musculoskeletal"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 2,
+    "core": false,
+    "demoPick": false
+  }
+}

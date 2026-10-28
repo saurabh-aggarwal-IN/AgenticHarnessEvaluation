@@ -1,0 +1,63 @@
+{
+  "caseId": "C10",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "F33.1",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Major depressive disorder, recurrent, moderate",
+      "snippet": "major depressive disorder, recurrent, moderate",
+      "snippetSource": "encounter_note",
+      "rationale": "The note explicitly documents recurrent moderate major depressive disorder."
+    },
+    {
+      "code": "96127",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Brief emotional/behavioral assessment (PHQ-9)",
+      "snippet": "PHQ-9 score is 14",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a scored PHQ-9, a standardized brief depression assessment."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "F32.1",
+      "reason": "Single-episode depression; the note says recurrent."
+    },
+    {
+      "code": "F33.2",
+      "reason": "Severe recurrent depression is not documented; the note says moderate."
+    },
+    {
+      "code": "F33.9",
+      "reason": "Unspecified recurrent depression; severity and type are documented."
+    },
+    {
+      "code": "F32.9",
+      "reason": "Unspecified depression; the note is more specific."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": false
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests behavioral-health specificity and a standardized assessment procedure code."
+}

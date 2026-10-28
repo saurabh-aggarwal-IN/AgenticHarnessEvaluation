@@ -6,6 +6,7 @@ import io
 import json
 import logging
 import os
+import re
 import secrets
 import uuid
 from contextlib import asynccontextmanager
@@ -322,13 +323,18 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                 error="Commit SHA or branch name is required",
             )
 
-        # 1. Check local repository candidates
+        # 1. Check local repository candidates (is it already on disk?)
         candidate_paths: list[Path] = []
         if os.path.exists(body.repo_url):
             candidate_paths.append(Path(body.repo_url))
         clinical_local = Path("e:/HighLevel/ClinicalCoderAgent")
         if clinical_local.exists() and clinical_local not in candidate_paths:
             candidate_paths.append(clinical_local)
+        repo_cache_base = cfg.data_dir / "repo_cache"
+        if repo_cache_base.exists():
+            for p in repo_cache_base.iterdir():
+                if p.is_dir() and (p / ".git").exists() and p not in candidate_paths:
+                    candidate_paths.append(p)
         if cfg.runs_dir.exists():
             for p in cfg.runs_dir.glob("*/repo"):
                 if p.is_dir() and p not in candidate_paths:
@@ -358,36 +364,20 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                             author=parts[1].strip(),
                             date=parts[2].strip(),
                             message=parts[3].strip(),
+                            cached_locally=True,
+                            downloaded=False,
+                            local_path=str(repo_dir),
                         )
             except Exception as exc:
                 logger.debug("Local git check error in %s: %s", repo_dir, exc)
 
-        # 2. Check remote repository via git ls-remote if not found locally
-        try:
-            proc = await asyncio.create_subprocess_exec(
-                "git",
-                "ls-remote",
-                body.repo_url,
-                commit_raw,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=8.0)
-            if proc.returncode == 0 and stdout:
-                lines = stdout.decode("utf-8", errors="replace").strip().splitlines()
-                if lines:
-                    sha = lines[0].split()[0]
-                    ref_name = lines[0].split()[-1] if len(lines[0].split()) > 1 else ""
-                    return GitVerifyCommitOut(
-                        accessible=True,
-                        commit=commit_raw,
-                        full_sha=sha,
-                        message=f"Resolved via remote ref {ref_name}",
-                    )
-        except Exception as exc:
-            logger.debug("git ls-remote failed: %s", exc)
+        # 2. Commit is NOT on disk. Verify against remote repository and download automatically.
+        resolved_sha: str | None = None
+        remote_author: str | None = None
+        remote_date: str | None = None
+        remote_message: str | None = None
 
-        # 3. If GitHub URL, check GitHub Commits API
+        # 2a. Check GitHub API if github.com
         if "github.com" in body.repo_url:
             try:
                 cleaned = body.repo_url.rstrip("/").removesuffix(".git")
@@ -398,25 +388,131 @@ def create_app(ctx: AppContext | None = None, *, start_worker: bool | None = Non
                     headers = {"User-Agent": "ClinicalHarnessLab/0.1.0"}
                     if body.git_token:
                         headers["Authorization"] = f"Bearer {body.git_token}"
-                    async with httpx.AsyncClient(timeout=5.0) as client:
+                    async with httpx.AsyncClient(timeout=6.0) as client:
                         resp = await client.get(gh_url, headers=headers)
                         if resp.status_code == 200:
                             data = resp.json()
-                            return GitVerifyCommitOut(
-                                accessible=True,
-                                commit=commit_raw,
-                                full_sha=data.get("sha"),
-                                author=data.get("commit", {}).get("author", {}).get("name"),
-                                date=data.get("commit", {}).get("author", {}).get("date"),
-                                message=data.get("commit", {}).get("message", "").splitlines()[0] if data.get("commit", {}).get("message") else None,
-                            )
+                            resolved_sha = data.get("sha")
+                            remote_author = data.get("commit", {}).get("author", {}).get("name")
+                            remote_date = data.get("commit", {}).get("author", {}).get("date")
+                            remote_message = data.get("commit", {}).get("message", "").splitlines()[0] if data.get("commit", {}).get("message") else None
             except Exception as exc:
                 logger.debug("GitHub API check failed: %s", exc)
+
+        # 2b. Check git ls-remote if not resolved via API
+        if not resolved_sha:
+            try:
+                proc = await asyncio.create_subprocess_exec(
+                    "git",
+                    "ls-remote",
+                    body.repo_url,
+                    commit_raw,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
+                )
+                stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=8.0)
+                if proc.returncode == 0 and stdout:
+                    lines = stdout.decode("utf-8", errors="replace").strip().splitlines()
+                    if lines:
+                        resolved_sha = lines[0].split()[0]
+                        ref_name = lines[0].split()[-1] if len(lines[0].split()) > 1 else ""
+                        remote_message = f"Resolved via remote ref {ref_name}"
+            except Exception as exc:
+                logger.debug("git ls-remote failed: %s", exc)
+
+        # 3. Determine target local repository to download commit code into
+        target_ref = resolved_sha or commit_raw
+        target_repo: Path
+        if clinical_local.exists() and ("clinicalcoder" in body.repo_url.lower()):
+            target_repo = clinical_local
+        else:
+            repo_cache_dir = cfg.data_dir / "repo_cache"
+            repo_cache_dir.mkdir(parents=True, exist_ok=True)
+            slug = re.sub(r"[^a-zA-Z0-9_\-]", "_", body.repo_url.split("/")[-1].removesuffix(".git")) or "default"
+            target_repo = repo_cache_dir / slug
+            if not target_repo.exists() or not (target_repo / ".git").exists():
+                target_repo.mkdir(parents=True, exist_ok=True)
+                init_p = await asyncio.create_subprocess_exec("git", "init", "-q", cwd=str(target_repo))
+                await init_p.communicate()
+                rem_p = await asyncio.create_subprocess_exec("git", "remote", "add", "origin", body.repo_url, cwd=str(target_repo))
+                await rem_p.communicate()
+
+        # 4. Automatically download / fetch code to disk
+        fetch_cmd = ["git"]
+        if body.git_token:
+            fetch_cmd.extend(["-c", f"http.extraHeader=Authorization: Bearer {body.git_token}"])
+        fetch_cmd.extend(["fetch", "--depth", "1", "--no-tags", "origin", target_ref])
+
+        try:
+            fetch_p = await asyncio.create_subprocess_exec(
+                *fetch_cmd,
+                cwd=str(target_repo),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await asyncio.wait_for(fetch_p.communicate(), timeout=25.0)
+            if fetch_p.returncode != 0:
+                # Fallback to standard fetch without depth limit
+                fallback_cmd = ["git"]
+                if body.git_token:
+                    fallback_cmd.extend(["-c", f"http.extraHeader=Authorization: Bearer {body.git_token}"])
+                fallback_cmd.extend(["fetch", "origin", target_ref])
+                fb_p = await asyncio.create_subprocess_exec(*fallback_cmd, cwd=str(target_repo), stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                await asyncio.wait_for(fb_p.communicate(), timeout=35.0)
+        except Exception as exc:
+            logger.debug("Automated git fetch failed: %s", exc)
+
+        # 5. Verify that the commit is now safely stored on disk
+        try:
+            vproc = await asyncio.create_subprocess_exec(
+                "git",
+                "show",
+                "-s",
+                "--format=%H|%an|%ad|%s",
+                target_ref,
+                cwd=str(target_repo),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            vstdout, _ = await vproc.communicate()
+            if vproc.returncode == 0 and vstdout:
+                text = vstdout.decode("utf-8", errors="replace").strip()
+                parts = text.split("|", 3)
+                if len(parts) >= 4:
+                    return GitVerifyCommitOut(
+                        accessible=True,
+                        commit=commit_raw,
+                        full_sha=parts[0].strip(),
+                        author=parts[1].strip() or remote_author,
+                        date=parts[2].strip() or remote_date,
+                        message=parts[3].strip() or remote_message,
+                        cached_locally=True,
+                        downloaded=True,
+                        local_path=str(target_repo),
+                    )
+        except Exception as exc:
+            logger.debug("Post-fetch verification failed: %s", exc)
+
+        # 6. If remote was resolved but local fetch timed out/failed, report status
+        if resolved_sha:
+            return GitVerifyCommitOut(
+                accessible=True,
+                commit=commit_raw,
+                full_sha=resolved_sha,
+                author=remote_author,
+                date=remote_date,
+                message=remote_message or "Verified on remote, local download pending",
+                cached_locally=False,
+                downloaded=False,
+                error=None,
+            )
 
         return GitVerifyCommitOut(
             accessible=False,
             commit=commit_raw,
-            error=f"Commit '{commit_raw}' was not found or could not be accessed in {body.repo_url}.",
+            error=f"Commit '{commit_raw}' was not found locally or remotely in {body.repo_url}.",
+            cached_locally=False,
+            downloaded=False,
         )
 
     @api.post("/workers/unit/start", response_model=WorkerUnitOut)

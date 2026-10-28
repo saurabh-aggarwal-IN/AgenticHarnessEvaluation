@@ -1,0 +1,63 @@
+{
+  "caseId": "C06",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "Z94.0",
+      "system": "ICD-10-CM",
+      "type": "status",
+      "label": "Kidney transplant status",
+      "snippet": "routine follow-up of transplant",
+      "snippetSource": "encounter_note",
+      "historySnippet": "Kidney transplant status",
+      "rationale": "The note documents current transplant follow-up and stable status; the history specifies a kidney transplant, so Z94.0 applies rather than the unspecified-organ code Z94.9."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "Z94.9",
+      "reason": "Unspecified organ transplant status; history specifies a kidney transplant."
+    },
+    {
+      "code": "T86.1",
+      "reason": "Kidney transplant complication is not documented; the graft is stable."
+    },
+    {
+      "code": "N18.9",
+      "reason": "CKD is not documented; creatinine 1.3 mg/dL is stable and no CKD stage is given."
+    },
+    {
+      "code": "N18.3",
+      "reason": "Non-billable parent and CKD stage 3 is not documented."
+    },
+    {
+      "code": "N18.30",
+      "reason": "CKD stage 3 is not documented."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "Z94.0"
+    ],
+    "purpose": "History supplies the organ (kidney) while the current note supplies the current transplant status."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests history-derived specificity: the note says transplant but not which organ; history specifies kidney. The provenance check accepts the note snippet for status and records the history snippet for organ specificity."
+}

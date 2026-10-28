@@ -1,0 +1,77 @@
+{
+  "caseId": "C01",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "E11.9",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Type 2 diabetes mellitus without complications",
+      "snippet": "stable chronic T2DM without complications",
+      "snippetSource": "encounter_note",
+      "rationale": "The note explicitly assesses stable chronic T2DM without complications."
+    },
+    {
+      "code": "I50.22",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Chronic systolic (congestive) heart failure",
+      "snippet": "chronic systolic heart failure",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents chronic systolic heart failure, so the chronic systolic code is supported rather than unspecified heart failure."
+    },
+    {
+      "code": "93000",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "12-lead EKG",
+      "snippet": "A 12-lead EKG was performed in the office today",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a 12-lead EKG performed in the office; this is the routine ECG code."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "I50.9",
+      "reason": "Unspecified heart failure; the note specifies chronic systolic heart failure."
+    },
+    {
+      "code": "I50.20",
+      "reason": "Unspecified systolic heart failure; chronicity is documented."
+    },
+    {
+      "code": "E11.65",
+      "reason": "Type 2 diabetes with hyperglycemia is not documented."
+    },
+    {
+      "code": "E11.22",
+      "reason": "Diabetic chronic kidney disease is not documented in this encounter."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "E11.9",
+      "I50.22"
+    ],
+    "purpose": "Confirm the active T2DM and CHF HCCs from prior quarters; do not recapture unsupported conditions."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "This is the DemoProblem.docx encounter. The note alone supports all three codes; history is confirmatory for risk-adjustment recapture. The primary contrast is the omitted CPT code and thin provenance, not a diagnosis that requires history."
+}

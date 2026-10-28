@@ -1,0 +1,55 @@
+{
+  "caseId": "C10",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Recurrent moderate major depressive disorder with PHQ-9",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "34-year-old female presents for follow-up of major depressive disorder, recurrent, moderate. She reports depressed mood most days, anhedonia, poor sleep, and low energy for six weeks. She denies suicidal ideation, hallucinations, and manic symptoms. The PHQ-9 score is 14. Assessment: major depressive disorder, recurrent, moderate. Continue sertraline 50 mg daily and refer to psychotherapy.",
+  "history": {
+    "patientId": "SYN-C10",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C10-001",
+        "date": "2026-02-20",
+        "setting": "office",
+        "diagnoses": [
+          "F33.1"
+        ],
+        "procedures": [
+          "96127"
+        ]
+      }
+    ],
+    "activeHccs": [],
+    "activeConditions": [
+      {
+        "code": "F33.1",
+        "label": "Major depressive disorder, recurrent, moderate",
+        "lastDocumented": "2026-02-20"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "behavioral health",
+    "difficulty": "medium",
+    "tags": [
+      "extra",
+      "procedure",
+      "behavioral-health"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 2,
+    "core": false,
+    "demoPick": false
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "caseId": "C08",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Uncomplicated UTI with urinalysis and urine culture",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "31-year-old female presents with three days of dysuria, urinary frequency, and suprapubic discomfort. She denies fever, flank pain, and vaginal discharge. Examination: temperature 36.9 C, suprapubic tenderness, no costovertebral angle tenderness. A urine dipstick is positive for leukocyte esterase and nitrite. A quantitative urine culture was sent. Assessment: uncomplicated urinary tract infection. She was started on nitrofurantoin for five days.",
+  "history": {
+    "patientId": "SYN-C08",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [],
+    "activeHccs": [],
+    "activeConditions": []
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "primary care",
+    "difficulty": "easy",
+    "tags": [
+      "extra",
+      "procedure",
+      "infectious-disease"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 3,
+    "core": false,
+    "demoPick": false
+  }
+}

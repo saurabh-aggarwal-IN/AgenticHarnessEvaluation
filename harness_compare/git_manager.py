@@ -330,6 +330,40 @@ class GitManager:
 
     async def _fetch(self, repo_dir: Path, commits: list[str]) -> None:
         unique = list(dict.fromkeys(commits))
+
+        # Check local repository caches on disk first (offline-first capability)
+        local_candidates: list[Path] = [
+            Path("e:/HighLevel/ClinicalCoderAgent"),
+            self.cfg.data_dir / "repo_cache",
+        ]
+        repo_cache_base = self.cfg.data_dir / "repo_cache"
+        if repo_cache_base.exists():
+            for p in repo_cache_base.iterdir():
+                if p.is_dir() and (p / ".git").exists() and p not in local_candidates:
+                    local_candidates.append(p)
+        if self.cfg.runs_dir.exists():
+            for p in self.cfg.runs_dir.glob("*/repo"):
+                if p != repo_dir and p.is_dir() and p not in local_candidates:
+                    local_candidates.append(p)
+
+        still_missing: list[str] = []
+        for commit in unique:
+            found_local = False
+            for cand in local_candidates:
+                if cand.exists() and cand.is_dir():
+                    try:
+                        # Attempt to fetch directly from local on-disk repository
+                        await self._git(["fetch", str(cand), commit], cwd=repo_dir, timeout_s=15.0)
+                        found_local = True
+                        break
+                    except Exception:
+                        pass
+            if not found_local:
+                still_missing.append(commit)
+
+        if not still_missing:
+            return
+
         try:
             await self._git(
                 [
@@ -338,14 +372,14 @@ class GitManager:
                     "1",
                     "--no-tags",
                     "origin",
-                    *unique,
+                    *still_missing,
                 ],
                 cwd=repo_dir,
             )
             return
         except RepoError:
             pass
-        for commit in unique:
+        for commit in still_missing:
             try:
                 await self._git(
                     ["fetch", "--depth", "1", "--no-tags", "origin", commit],

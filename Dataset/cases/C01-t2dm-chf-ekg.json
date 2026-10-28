@@ -1,0 +1,90 @@
+{
+  "caseId": "C01",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "T2DM with chronic systolic CHF and in-office EKG",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "58-year-old male presenting for routine follow-up of type 2 diabetes mellitus and chronic systolic heart failure. Patient reports mild shortness of breath on exertion, but no acute chest pain. Current medications: metformin 1000 mg twice daily and lisinopril 20 mg daily. Examination shows mild lower extremity edema; lungs are clear to auscultation. Assessed as stable chronic T2DM without complications and stable chronic systolic heart failure. A 12-lead EKG was performed in the office today; it showed normal sinus rhythm without acute ischemic changes. Continue current medications and follow up in three months.",
+  "history": {
+    "patientId": "SYN-C01",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C01-001",
+        "date": "2025-09-14",
+        "setting": "office",
+        "diagnoses": [
+          "E11.9",
+          "I50.22"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C01-002",
+        "date": "2026-03-02",
+        "setting": "office",
+        "diagnoses": [
+          "E11.9",
+          "I50.22"
+        ],
+        "procedures": [
+          "93000"
+        ]
+      }
+    ],
+    "activeHccs": [
+      {
+        "hcc": "HCC 85",
+        "label": "Congestive heart failure",
+        "supportingCodes": [
+          "I50.22"
+        ],
+        "lastDocumented": "2026-03-02"
+      },
+      {
+        "hcc": "HCC 19",
+        "label": "Diabetes without complication",
+        "supportingCodes": [
+          "E11.9"
+        ],
+        "lastDocumented": "2026-03-02"
+      }
+    ],
+    "activeConditions": [
+      {
+        "code": "E11.9",
+        "label": "Type 2 diabetes mellitus without complications",
+        "lastDocumented": "2026-03-02"
+      },
+      {
+        "code": "I50.22",
+        "label": "Chronic systolic heart failure",
+        "lastDocumented": "2026-03-02"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine",
+    "difficulty": "easy",
+    "tags": [
+      "core",
+      "demo-pick",
+      "procedure",
+      "history"
+    ],
+    "demoRole": "headline-clinical",
+    "expectedCodeCount": 3,
+    "core": true,
+    "demoPick": true
+  }
+}

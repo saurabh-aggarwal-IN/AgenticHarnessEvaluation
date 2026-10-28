@@ -1,0 +1,37 @@
+{
+  "caseId": "C07",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Group A streptococcal pharyngitis with rapid antigen test",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "23-year-old female presents with two days of sore throat, fever to 38.4 C, and painful swallowing. She denies cough and nasal congestion. Examination: temperature 38.4 C, tonsillar exudates, tender anterior cervical lymphadenopathy, and no cough. A rapid antigen detection test for group A streptococcus is positive. Assessment: group A streptococcal pharyngitis. She was prescribed a 10-day course of oral penicillin V and advised on supportive care.",
+  "history": {
+    "patientId": "SYN-C07",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [],
+    "activeHccs": [],
+    "activeConditions": []
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "primary care",
+    "difficulty": "easy",
+    "tags": [
+      "extra",
+      "procedure",
+      "infectious-disease"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 2,
+    "core": false,
+    "demoPick": false
+  }
+}

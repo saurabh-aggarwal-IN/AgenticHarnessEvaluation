@@ -1,0 +1,82 @@
+{
+  "caseId": "C05",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Historical COPD HCC not supported by the current note",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "55-year-old female with type 2 diabetes mellitus presents for routine follow-up. She reports good adherence to metformin and denies polyuria, polydipsia, or blurred vision. She has no cough, wheezing, or shortness of breath. Examination: lungs clear to auscultation bilaterally; no wheezes or crackles. Assessment: type 2 diabetes mellitus without complications, well controlled. Continue metformin 1000 mg twice daily and follow up in six months.",
+  "history": {
+    "patientId": "SYN-C05",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C05-001",
+        "date": "2025-08-17",
+        "setting": "office",
+        "diagnoses": [
+          "E11.9",
+          "J44.1"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C05-002",
+        "date": "2026-01-25",
+        "setting": "office",
+        "diagnoses": [
+          "E11.9",
+          "J44.1"
+        ],
+        "procedures": []
+      }
+    ],
+    "activeHccs": [
+      {
+        "hcc": "HCC 111",
+        "label": "Chronic obstructive pulmonary disease",
+        "supportingCodes": [
+          "J44.1"
+        ],
+        "lastDocumented": "2026-01-25"
+      }
+    ],
+    "activeConditions": [
+      {
+        "code": "E11.9",
+        "label": "Type 2 diabetes mellitus without complications",
+        "lastDocumented": "2026-01-25"
+      },
+      {
+        "code": "J44.1",
+        "label": "COPD with acute exacerbation",
+        "lastDocumented": "2026-01-25"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check",
+      "no_hallucination"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine",
+    "difficulty": "hard",
+    "tags": [
+      "core",
+      "demo-pick",
+      "trap",
+      "hallucination",
+      "history"
+    ],
+    "demoRole": "hallucination-trap",
+    "expectedCodeCount": 1,
+    "core": true,
+    "demoPick": true
+  }
+}

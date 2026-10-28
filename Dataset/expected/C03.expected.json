@@ -1,0 +1,98 @@
+{
+  "caseId": "C03",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "I50.23",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Acute on chronic systolic (congestive) heart failure",
+      "snippet": "acute on chronic systolic heart failure",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents an acute exacerbation of known chronic systolic heart failure, which maps to I50.23."
+    },
+    {
+      "code": "J44.1",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "COPD with (acute) exacerbation",
+      "snippet": "acute exacerbation of COPD",
+      "snippetSource": "encounter_note",
+      "rationale": "The note explicitly assesses an acute exacerbation of COPD."
+    },
+    {
+      "code": "71046",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Chest X-ray, 2 views",
+      "snippet": "A two-view chest X-ray",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a two-view chest X-ray; 71046 is the two-view chest radiograph code."
+    },
+    {
+      "code": "94640",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Nebulized bronchodilator treatment",
+      "snippet": "nebulized bronchodilators in the office",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents nebulized bronchodilator treatment administered in the office for acute airway obstruction."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "I50.9",
+      "reason": "Unspecified heart failure; acute on chronic systolic failure is documented."
+    },
+    {
+      "code": "I50.22",
+      "reason": "Chronic systolic failure alone misses the acute exacerbation."
+    },
+    {
+      "code": "J44.9",
+      "reason": "COPD is documented with an acute exacerbation."
+    },
+    {
+      "code": "J43.9",
+      "reason": "Emphysema is not documented."
+    },
+    {
+      "code": "71045",
+      "reason": "The note specifies a two-view chest X-ray, not a one-view study."
+    },
+    {
+      "code": "94664",
+      "reason": "Inhaler technique demonstration/evaluation is not documented."
+    },
+    {
+      "code": "J96.01",
+      "reason": "Acute hypoxemic respiratory failure is not diagnosed; no blood gas or respiratory-failure assessment is documented."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "I50.22",
+      "J44.1"
+    ],
+    "purpose": "Confirm the chronic CHF and COPD baseline before coding the acute-on-chronic and exacerbation codes."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests acute-on-chronic specificity, COPD exacerbation, a two-view chest X-ray, and nebulized bronchodilator treatment."
+}

@@ -1,0 +1,72 @@
+{
+  "caseId": "C04",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "I12.9",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Hypertensive CKD with stage 1-4 CKD or unspecified CKD",
+      "snippet": "hypertensive chronic kidney disease with stage 2 chronic kidney disease",
+      "snippetSource": "encounter_note",
+      "rationale": "The note links hypertension to CKD; I12.9 is the combination code for hypertensive CKD with stage 1-4 CKD."
+    },
+    {
+      "code": "N18.2",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Chronic kidney disease, stage 2 (mild)",
+      "snippet": "chronic kidney disease, stage 2",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents CKD stage 2, which requires N18.2 as the additional stage code."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "I10",
+      "reason": "Essential hypertension alone misses the hypertensive CKD combination; do not code I10 separately with I12.9."
+    },
+    {
+      "code": "N18.9",
+      "reason": "CKD stage 2 is documented."
+    },
+    {
+      "code": "I12.0",
+      "reason": "I12.0 is for stage 5 CKD or ESRD, not stage 2."
+    },
+    {
+      "code": "N18.3",
+      "reason": "Non-billable parent; stage 3 is not documented."
+    },
+    {
+      "code": "N18.30",
+      "reason": "Stage 3 is not documented; the note says stage 2."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "I12.9",
+      "N18.2"
+    ],
+    "purpose": "Confirm the established hypertensive CKD and stage 2."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests the I12.9 + N18.2 combination and the common error of coding I10 plus N18.2 separately."
+}

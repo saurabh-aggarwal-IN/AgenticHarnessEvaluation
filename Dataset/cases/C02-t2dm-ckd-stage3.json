@@ -1,0 +1,79 @@
+{
+  "caseId": "C02",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "T2DM with diabetic CKD stage 3",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "64-year-old female with type 2 diabetes mellitus and diabetic chronic kidney disease, stage 3, presents for routine follow-up. She reports no polyuria, polydipsia, or edema. Current medications: metformin 500 mg twice daily, empagliflozin 10 mg daily, and lisinopril 10 mg daily. Blood pressure is 132/78. Laboratory results today: eGFR in the stage 3 range and urine albumin-to-creatinine ratio 85 mg/g. Assessment: type 2 diabetes mellitus with diabetic chronic kidney disease, stage 3; blood pressure at goal. Continue current medications and repeat labs in three months.",
+  "history": {
+    "patientId": "SYN-C02",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C02-001",
+        "date": "2025-11-08",
+        "setting": "office",
+        "diagnoses": [
+          "E11.22",
+          "N18.30"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C02-002",
+        "date": "2026-04-19",
+        "setting": "office",
+        "diagnoses": [
+          "E11.22",
+          "N18.30"
+        ],
+        "procedures": []
+      }
+    ],
+    "activeHccs": [
+      {
+        "hcc": "HCC 18",
+        "label": "Diabetes with chronic complications",
+        "supportingCodes": [
+          "E11.22"
+        ],
+        "lastDocumented": "2026-04-19"
+      }
+    ],
+    "activeConditions": [
+      {
+        "code": "E11.22",
+        "label": "Type 2 diabetes mellitus with diabetic chronic kidney disease",
+        "lastDocumented": "2026-04-19"
+      },
+      {
+        "code": "N18.30",
+        "label": "Chronic kidney disease, stage 3 unspecified",
+        "lastDocumented": "2026-04-19"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine / nephrology",
+    "difficulty": "medium",
+    "tags": [
+      "core",
+      "specificity",
+      "history"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 2,
+    "core": true,
+    "demoPick": false
+  }
+}

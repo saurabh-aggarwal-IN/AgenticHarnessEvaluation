@@ -1,0 +1,70 @@
+{
+  "caseId": "C04",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Hypertensive CKD stage 2",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "67-year-old female with hypertension and chronic kidney disease, stage 2, presents for blood pressure follow-up. She reports no headache, chest pain, or dyspnea. Current medications: lisinopril 20 mg daily and amlodipine 5 mg daily. Blood pressure is 148/88; repeat is 144/86. Laboratory results: eGFR 75 mL/min/1.73 m2 and urine albumin-to-creatinine ratio 45 mg/g. Assessment: hypertensive chronic kidney disease with stage 2 chronic kidney disease; blood pressure above goal. Continue lisinopril and amlodipine and follow up in four weeks.",
+  "history": {
+    "patientId": "SYN-C04",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C04-001",
+        "date": "2025-10-30",
+        "setting": "office",
+        "diagnoses": [
+          "I12.9",
+          "N18.2"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C04-002",
+        "date": "2026-04-02",
+        "setting": "office",
+        "diagnoses": [
+          "I12.9",
+          "N18.2"
+        ],
+        "procedures": []
+      }
+    ],
+    "activeHccs": [],
+    "activeConditions": [
+      {
+        "code": "I12.9",
+        "label": "Hypertensive chronic kidney disease",
+        "lastDocumented": "2026-04-02"
+      },
+      {
+        "code": "N18.2",
+        "label": "Chronic kidney disease, stage 2",
+        "lastDocumented": "2026-04-02"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine / nephrology",
+    "difficulty": "medium",
+    "tags": [
+      "core",
+      "combination-code",
+      "history"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 2,
+    "core": true,
+    "demoPick": false
+  }
+}

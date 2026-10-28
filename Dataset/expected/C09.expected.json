@@ -1,0 +1,63 @@
+{
+  "caseId": "C09",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "M17.11",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Unilateral primary osteoarthritis, right knee",
+      "snippet": "primary osteoarthritis of the right knee",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents primary osteoarthritis of the right knee, which maps to M17.11."
+    },
+    {
+      "code": "73562",
+      "system": "CPT",
+      "type": "procedure",
+      "label": "Knee X-ray, 3 views",
+      "snippet": "three-view X-ray of the right knee",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents a three-view X-ray of the right knee, which maps to 73562."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "M17.10",
+      "reason": "Unspecified knee; the note specifies the right knee."
+    },
+    {
+      "code": "M17.9",
+      "reason": "Unspecified osteoarthritis; the note specifies primary osteoarthritis of the right knee."
+    },
+    {
+      "code": "M25.561",
+      "reason": "Pain in right knee is a symptom; the diagnosis is more specific."
+    },
+    {
+      "code": "73560",
+      "reason": "The note specifies three views, not one or two."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": false
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests laterality and the procedure-view count."
+}

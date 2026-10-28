@@ -1,0 +1,72 @@
+{
+  "caseId": "C02",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "E11.22",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Type 2 diabetes mellitus with diabetic chronic kidney disease",
+      "snippet": "type 2 diabetes mellitus with diabetic chronic kidney disease, stage 3",
+      "snippetSource": "encounter_note",
+      "rationale": "The note links type 2 diabetes to diabetic chronic kidney disease, which requires the combination code E11.22."
+    },
+    {
+      "code": "N18.30",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Chronic kidney disease, stage 3 unspecified",
+      "snippet": "chronic kidney disease, stage 3",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents CKD stage 3 without 3a/3b detail; N18.30 is the billable unspecified stage 3 code. N18.3 is a non-billable parent."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "E11.9",
+      "reason": "Loss of specificity; the note documents diabetic CKD."
+    },
+    {
+      "code": "N18.3",
+      "reason": "Non-billable parent code; use N18.30 for stage 3 unspecified."
+    },
+    {
+      "code": "N18.9",
+      "reason": "CKD stage is documented as stage 3."
+    },
+    {
+      "code": "E11.21",
+      "reason": "Diabetic nephropathy is not the same as diabetic CKD; E11.22 is supported."
+    },
+    {
+      "code": "I12.9",
+      "reason": "Hypertension is not documented as a diagnosis in this note."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "E11.22",
+      "N18.30"
+    ],
+    "purpose": "Confirm the established diabetic CKD and stage; support recapture of the chronic condition."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "Tests specificity and the non-billable parent-code trap. The note documents stage 3 without 3a/3b detail, so N18.30 is the billable unspecified-stage code."
+}

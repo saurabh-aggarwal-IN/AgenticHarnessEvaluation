@@ -1,0 +1,63 @@
+{
+  "caseId": "C05",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "outputContract": "coding-output-v1",
+  "expectedCodes": [
+    {
+      "code": "E11.9",
+      "system": "ICD-10-CM",
+      "type": "diagnosis",
+      "label": "Type 2 diabetes mellitus without complications",
+      "snippet": "type 2 diabetes mellitus without complications",
+      "snippetSource": "encounter_note",
+      "rationale": "The note documents type 2 diabetes without complications; this is the only supported diagnosis."
+    }
+  ],
+  "forbiddenCodes": [
+    {
+      "code": "J44.1",
+      "reason": "Historical COPD HCC from prior quarters; the current note has no respiratory symptoms, exam findings, or assessment. Do not recapture."
+    },
+    {
+      "code": "J44.9",
+      "reason": "No current COPD documentation."
+    },
+    {
+      "code": "J43.9",
+      "reason": "No emphysema documentation."
+    },
+    {
+      "code": "J45.909",
+      "reason": "No asthma documentation."
+    }
+  ],
+  "requiredHistory": {
+    "mustRead": true,
+    "historyCodes": [
+      "J44.1"
+    ],
+    "purpose": "The agent must inspect history, see the prior COPD HCC, and deliberately not recapture it without current documentation."
+  },
+  "trap": {
+    "type": "historical_hcc_recapture",
+    "forbiddenCode": "J44.1",
+    "explanation": "Risk-adjustment coding cannot carry forward a historical HCC unless the current encounter documents the condition as current, monitored, or assessed."
+  },
+  "grading": {
+    "mode": "multi_label",
+    "exactSetMatch": true,
+    "partialCredit": true,
+    "provenanceRequired": true,
+    "ignoreCodePatterns": [
+      "^99[2-4]"
+    ],
+    "normalization": [
+      "uppercase",
+      "trim",
+      "collapse internal whitespace"
+    ],
+    "notes": "Required codes are the gold set. Forbidden codes are hard errors. E/M codes matching ^99[2-4] are ignored because E/M assignment is out of scope."
+  },
+  "notes": "This is the core hallucination/over-coding trap. A correct output has one code (E11.9). Any COPD code is a hard failure."
+}

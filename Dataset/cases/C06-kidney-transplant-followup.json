@@ -1,0 +1,65 @@
+{
+  "caseId": "C06",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Transplant follow-up; history specifies kidney",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "49-year-old male presents for routine follow-up of transplant. He reports no fever, chills, dysuria, or weight change. Current medications: tacrolimus 2 mg twice daily and mycophenolate 500 mg twice daily. Examination: blood pressure 122/78, temperature 36.8 C; no edema. Laboratory results: creatinine 1.3 mg/dL, unchanged from prior; tacrolimus trough 7.2 ng/mL. Assessment: transplant status, stable; continue current immunosuppression and follow up in three months.",
+  "history": {
+    "patientId": "SYN-C06",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "transplantOrgan": "kidney",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C06-001",
+        "date": "2025-07-12",
+        "setting": "office",
+        "diagnoses": [
+          "Z94.0"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C06-002",
+        "date": "2026-02-08",
+        "setting": "office",
+        "diagnoses": [
+          "Z94.0"
+        ],
+        "procedures": []
+      }
+    ],
+    "activeHccs": [],
+    "activeConditions": [
+      {
+        "code": "Z94.0",
+        "label": "Kidney transplant status",
+        "lastDocumented": "2026-02-08"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine / transplant",
+    "difficulty": "hard",
+    "tags": [
+      "core",
+      "demo-pick",
+      "history-specificity",
+      "status-code"
+    ],
+    "demoRole": "history-specificity",
+    "expectedCodeCount": 1,
+    "core": true,
+    "demoPick": true
+  }
+}

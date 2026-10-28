@@ -1,0 +1,90 @@
+{
+  "caseId": "C03",
+  "datasetId": "clinical-coding-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Acute on chronic systolic CHF with COPD exacerbation",
+  "synthetic": true,
+  "phi": false,
+  "encounterNote": "72-year-old male with known chronic systolic heart failure and chronic obstructive pulmonary disease presents with three days of worsening dyspnea, cough, and yellow sputum. He denies fever and chest pain. Examination: temperature 37.1 C, blood pressure 138/84, pulse 96, respirations 24, oxygen saturation 88% on room air. Bibasilar crackles and expiratory wheeze are present; there is trace bilateral pedal edema. A two-view chest X-ray shows pulmonary edema without focal infiltrate. He is assessed as acute on chronic systolic heart failure and acute exacerbation of COPD. He received furosemide and nebulized bronchodilators in the office and was referred for urgent hospital admission.",
+  "history": {
+    "patientId": "SYN-C03",
+    "riskAdjustmentModel": "CMS-HCC (illustrative; not used for scoring)",
+    "priorClaims": [
+      {
+        "claimId": "CLM-C03-001",
+        "date": "2025-12-11",
+        "setting": "office",
+        "diagnoses": [
+          "I50.22",
+          "J44.1"
+        ],
+        "procedures": []
+      },
+      {
+        "claimId": "CLM-C03-002",
+        "date": "2026-05-23",
+        "setting": "office",
+        "diagnoses": [
+          "I50.22",
+          "J44.1"
+        ],
+        "procedures": [
+          "71046"
+        ]
+      }
+    ],
+    "activeHccs": [
+      {
+        "hcc": "HCC 85",
+        "label": "Congestive heart failure",
+        "supportingCodes": [
+          "I50.22"
+        ],
+        "lastDocumented": "2026-05-23"
+      },
+      {
+        "hcc": "HCC 111",
+        "label": "Chronic obstructive pulmonary disease",
+        "supportingCodes": [
+          "J44.1"
+        ],
+        "lastDocumented": "2026-05-23"
+      }
+    ],
+    "activeConditions": [
+      {
+        "code": "I50.22",
+        "label": "Chronic systolic heart failure",
+        "lastDocumented": "2026-05-23"
+      },
+      {
+        "code": "J44.1",
+        "label": "COPD with acute exacerbation",
+        "lastDocumented": "2026-05-23"
+      }
+    ]
+  },
+  "task": {
+    "prompt": "Analyze the synthetic encounter note in `encounter_note.txt`. If a read-only `history.json` fixture is present in the workspace, you may consult it. Generate a justified set of accurate ICD-10-CM diagnosis codes and CPT procedure codes. Every code must include a verbatim snippet from the encounter note that supports it. Do not assign E/M codes. Return JSON matching the coding-output-v1 contract: {\"codes\":[{\"code\":\"...\",\"system\":\"ICD-10-CM|CPT\",\"snippet\":\"...\",\"rationale\":\"...\"}]}.",
+    "outputContract": "coding-output-v1",
+    "graders": [
+      "code_set_match",
+      "provenance_check",
+      "history_check"
+    ]
+  },
+  "metadata": {
+    "specialty": "internal medicine / pulmonology",
+    "difficulty": "medium",
+    "tags": [
+      "core",
+      "acute-on-chronic",
+      "procedure",
+      "history"
+    ],
+    "demoRole": null,
+    "expectedCodeCount": 4,
+    "core": true,
+    "demoPick": false
+  }
+}

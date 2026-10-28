@@ -302,6 +302,9 @@ class GitVerifyCommitOut(BaseModel):
     date: str | None = None
     message: str | None = None
     error: str | None = None
+    cached_locally: bool = False
+    downloaded: bool = False
+    local_path: str | None = None
 
 
 class WorkerUnitStartIn(BaseModel):
